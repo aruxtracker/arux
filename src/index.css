@@ -1,0 +1,1147 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 20% 96%;
+    --foreground: 240 30% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 30% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 30% 12%;
+
+    --primary: 248 84% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 262 85% 66%;
+
+    --secondary: 245 40% 96%;
+    --secondary-foreground: 248 60% 42%;
+
+    --muted: 240 20% 94%;
+    --muted-foreground: 240 10% 46%;
+
+    --accent: 248 45% 94%;
+    --accent-foreground: 248 60% 42%;
+
+    --destructive: 0 78% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 20% 90%;
+    --input: 240 20% 92%;
+    --ring: 248 84% 60%;
+
+    --radius: 1.5rem;
+
+    /* Playful brand colors */
+    --brand-purple: 248 84% 60%;
+    --brand-pink: 320 80% 62%;
+    --brand-orange: 25 95% 60%;
+    --brand-yellow: 45 95% 60%;
+    --brand-teal: 152 62% 48%;
+    --brand-blue: 220 85% 62%;
+
+    --income: 150 60% 38%;
+    --income-foreground: 0 0% 100%;
+    --income-bg: 150 62% 93%;
+
+    --expense: 350 75% 56%;
+    --expense-foreground: 0 0% 100%;
+    --expense-bg: 350 80% 95%;
+
+    --meeting: 248 84% 60%;
+    --meeting-foreground: 0 0% 100%;
+    --meeting-bg: 248 70% 95%;
+
+    --balance: 248 84% 60%;
+
+    /* Text placed on top of vivid gradient surfaces — never themed, so it
+       stays readable in dark mode and on every colour theme. */
+    --on-gradient: 0 0% 100%;
+    --on-gradient-ink: 240 32% 14%;
+
+
+    /* Frosted glass */
+    --glass: 0 0% 100% / 0.88;
+    --glass-border: 240 20% 88% / 0.8;
+    --glass-shadow: 0 1px 2px 0 hsl(240 40% 20% / 0.04), 0 12px 32px -12px hsl(240 40% 20% / 0.14);
+
+    --card-shadow: 0 1px 2px 0 hsl(240 30% 20% / 0.05), 0 2px 8px -4px hsl(240 30% 20% / 0.05);
+    --card-shadow-hover: 0 10px 34px -12px hsl(240 40% 25% / 0.2), 0 2px 6px 0 hsl(240 30% 20% / 0.06);
+
+    --shadow-glow: 0 0 24px 0 hsl(var(--primary) / 0.25);
+    --shadow-pop: 0 8px 22px -6px hsl(var(--primary) / 0.35);
+
+    --gradient-fun: linear-gradient(135deg, hsl(248 84% 58%) 0%, hsl(258 85% 62%) 55%, hsl(272 80% 62%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(248 84% 60%), hsl(200 85% 58%));
+    --gradient-warm: linear-gradient(135deg, hsl(272 80% 62%), hsl(330 80% 62%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(248 84% 70% / 0.14) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(262 80% 72% / 0.12) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(220 85% 72% / 0.1) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(152 60% 70% / 0.1) 0px, transparent 55%);
+
+    --transition-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 15% 32%;
+    --sidebar-primary: 248 84% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 248 45% 95%;
+    --sidebar-accent-foreground: 248 60% 42%;
+    --sidebar-border: 240 20% 91%;
+    --sidebar-ring: 248 84% 60%;
+  }
+
+
+  /* ============== THEME: Ocean Blue (light) ============== */
+  :root[data-theme='ocean']:not(.dark) {
+    --background: 210 50% 98%;
+    --foreground: 215 35% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 35% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 35% 12%;
+    --primary: 210 90% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 190 90% 55%;
+    --secondary: 200 40% 95%;
+    --secondary-foreground: 210 60% 35%;
+    --muted: 210 25% 94%;
+    --muted-foreground: 215 15% 45%;
+    --accent: 200 50% 92%;
+    --accent-foreground: 210 60% 35%;
+    --border: 210 30% 90%;
+    --input: 210 30% 92%;
+    --ring: 210 90% 55%;
+    --brand-purple: 210 90% 55%;
+    --brand-pink: 190 85% 55%;
+    --brand-orange: 175 70% 50%;
+    --brand-yellow: 220 90% 65%;
+    --brand-teal: 175 75% 45%;
+    --brand-blue: 220 90% 60%;
+    --balance: 210 90% 55%;
+    --gradient-fun: linear-gradient(135deg, hsl(220 90% 55%) 0%, hsl(195 90% 55%) 50%, hsl(175 75% 50%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(220 90% 60%), hsl(175 75% 50%));
+    --gradient-warm: linear-gradient(135deg, hsl(195 90% 55%), hsl(220 90% 60%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(210 90% 70% / 0.3) 0px, transparent 50%),
+                     radial-gradient(at 100% 0%, hsl(190 90% 70% / 0.25) 0px, transparent 50%),
+                     radial-gradient(at 100% 100%, hsl(220 85% 70% / 0.2) 0px, transparent 50%),
+                     radial-gradient(at 0% 100%, hsl(175 70% 70% / 0.2) 0px, transparent 50%);
+    --sidebar-background: 210 50% 98%;
+    --sidebar-foreground: 215 25% 30%;
+    --sidebar-primary: 210 90% 55%;
+    --sidebar-accent: 210 50% 94%;
+    --sidebar-accent-foreground: 210 60% 35%;
+    --sidebar-border: 210 30% 90%;
+    --sidebar-ring: 210 90% 55%;
+  }
+  /* ============== THEME: Ocean Blue (dark) ============== */
+  :root.dark[data-theme='ocean'] {
+    --background: 215 40% 7%;
+    --foreground: 210 25% 94%;
+    --card: 215 35% 11%;
+    --card-foreground: 210 25% 94%;
+    --popover: 215 35% 11%;
+    --popover-foreground: 210 25% 94%;
+    --primary: 210 90% 65%;
+    --primary-foreground: 215 40% 8%;
+    --primary-glow: 190 90% 65%;
+    --secondary: 215 25% 18%;
+    --secondary-foreground: 210 50% 80%;
+    --muted: 215 25% 16%;
+    --muted-foreground: 210 15% 65%;
+    --accent: 210 30% 22%;
+    --accent-foreground: 210 50% 80%;
+    --border: 215 25% 20%;
+    --input: 215 25% 20%;
+    --ring: 210 90% 65%;
+    --brand-purple: 210 90% 65%;
+    --brand-pink: 190 85% 65%;
+    --brand-orange: 175 70% 55%;
+    --brand-yellow: 220 90% 70%;
+    --brand-teal: 175 75% 55%;
+    --brand-blue: 220 90% 70%;
+    --balance: 210 90% 65%;
+    --gradient-fun: linear-gradient(135deg, hsl(220 90% 60%) 0%, hsl(195 90% 60%) 50%, hsl(175 75% 55%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(220 85% 65%), hsl(175 70% 55%));
+    --gradient-warm: linear-gradient(135deg, hsl(195 90% 60%), hsl(220 85% 65%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(210 90% 40% / 0.4) 0px, transparent 50%),
+                     radial-gradient(at 100% 0%, hsl(190 90% 40% / 0.3) 0px, transparent 50%),
+                     radial-gradient(at 100% 100%, hsl(220 85% 40% / 0.25) 0px, transparent 50%),
+                     radial-gradient(at 0% 100%, hsl(175 70% 40% / 0.2) 0px, transparent 50%);
+    --sidebar-background: 215 40% 8%;
+    --sidebar-foreground: 210 15% 82%;
+    --sidebar-primary: 210 90% 65%;
+    --sidebar-accent: 215 25% 16%;
+    --sidebar-accent-foreground: 210 50% 80%;
+    --sidebar-border: 215 25% 16%;
+    --sidebar-ring: 210 90% 65%;
+  }
+
+  /* ============== THEME: Sunset Orange (light) ============== */
+  :root[data-theme='sunset']:not(.dark) {
+    --background: 30 50% 98%;
+    --foreground: 20 35% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 35% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 35% 12%;
+    --primary: 20 90% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 45 95% 60%;
+    --secondary: 30 40% 95%;
+    --secondary-foreground: 20 60% 35%;
+    --muted: 30 25% 94%;
+    --muted-foreground: 25 15% 45%;
+    --accent: 30 50% 92%;
+    --accent-foreground: 20 60% 35%;
+    --border: 30 30% 90%;
+    --input: 30 30% 92%;
+    --ring: 20 90% 55%;
+    --brand-purple: 20 90% 55%;
+    --brand-pink: 350 85% 60%;
+    --brand-orange: 25 95% 58%;
+    --brand-yellow: 45 95% 58%;
+    --brand-teal: 12 85% 55%;
+    --brand-blue: 350 85% 60%;
+    --balance: 20 90% 55%;
+    --gradient-fun: linear-gradient(135deg, hsl(45 95% 58%) 0%, hsl(25 95% 58%) 50%, hsl(350 85% 60%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(20 90% 60%), hsl(350 85% 60%));
+    --gradient-warm: linear-gradient(135deg, hsl(45 95% 60%), hsl(20 90% 58%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(20 90% 70% / 0.3) 0px, transparent 50%),
+                     radial-gradient(at 100% 0%, hsl(45 95% 70% / 0.3) 0px, transparent 50%),
+                     radial-gradient(at 100% 100%, hsl(350 85% 70% / 0.2) 0px, transparent 50%),
+                     radial-gradient(at 0% 100%, hsl(25 95% 70% / 0.2) 0px, transparent 50%);
+    --sidebar-background: 30 50% 98%;
+    --sidebar-foreground: 20 25% 30%;
+    --sidebar-primary: 20 90% 55%;
+    --sidebar-accent: 30 50% 94%;
+    --sidebar-accent-foreground: 20 60% 35%;
+    --sidebar-border: 30 30% 90%;
+    --sidebar-ring: 20 90% 55%;
+  }
+  /* ============== THEME: Sunset Orange (dark) ============== */
+  :root.dark[data-theme='sunset'] {
+    --background: 20 40% 7%;
+    --foreground: 30 25% 94%;
+    --card: 20 35% 11%;
+    --card-foreground: 30 25% 94%;
+    --popover: 20 35% 11%;
+    --popover-foreground: 30 25% 94%;
+    --primary: 25 95% 65%;
+    --primary-foreground: 20 40% 8%;
+    --primary-glow: 45 95% 65%;
+    --secondary: 20 25% 18%;
+    --secondary-foreground: 30 50% 80%;
+    --muted: 20 25% 16%;
+    --muted-foreground: 25 15% 65%;
+    --accent: 20 30% 22%;
+    --accent-foreground: 30 50% 80%;
+    --border: 20 25% 20%;
+    --input: 20 25% 20%;
+    --ring: 25 95% 65%;
+    --brand-purple: 25 95% 65%;
+    --brand-pink: 350 85% 65%;
+    --brand-orange: 25 95% 65%;
+    --brand-yellow: 45 95% 65%;
+    --brand-teal: 12 85% 60%;
+    --brand-blue: 350 85% 65%;
+    --balance: 25 95% 65%;
+    --gradient-fun: linear-gradient(135deg, hsl(45 95% 60%) 0%, hsl(25 95% 60%) 50%, hsl(350 85% 65%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(20 85% 65%), hsl(350 85% 65%));
+    --gradient-warm: linear-gradient(135deg, hsl(45 95% 60%), hsl(20 85% 65%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(20 90% 40% / 0.4) 0px, transparent 50%),
+                     radial-gradient(at 100% 0%, hsl(45 95% 40% / 0.3) 0px, transparent 50%),
+                     radial-gradient(at 100% 100%, hsl(350 85% 40% / 0.25) 0px, transparent 50%),
+                     radial-gradient(at 0% 100%, hsl(25 95% 40% / 0.2) 0px, transparent 50%);
+    --sidebar-background: 20 40% 8%;
+    --sidebar-foreground: 30 15% 82%;
+    --sidebar-primary: 25 95% 65%;
+    --sidebar-accent: 20 25% 16%;
+    --sidebar-accent-foreground: 30 50% 80%;
+    --sidebar-border: 20 25% 16%;
+    --sidebar-ring: 25 95% 65%;
+  }
+
+  /* ============== THEME: Forest Green (light) ============== */
+  :root[data-theme='forest']:not(.dark) {
+    --background: 150 30% 97%;
+    --foreground: 155 35% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 155 35% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 155 35% 10%;
+    --primary: 158 72% 36%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 140 65% 46%;
+    --secondary: 150 35% 94%;
+    --secondary-foreground: 158 50% 26%;
+    --muted: 150 20% 94%;
+    --muted-foreground: 155 12% 42%;
+    --accent: 150 40% 92%;
+    --accent-foreground: 158 50% 26%;
+    --border: 150 22% 88%;
+    --input: 150 22% 91%;
+    --ring: 158 72% 36%;
+    --brand-purple: 158 72% 36%;
+    --brand-pink: 172 70% 40%;
+    --brand-orange: 95 60% 45%;
+    --brand-yellow: 80 65% 45%;
+    --brand-teal: 172 70% 38%;
+    --brand-blue: 190 70% 42%;
+    --balance: 158 72% 36%;
+    --gradient-fun: linear-gradient(135deg, hsl(150 70% 38%) 0%, hsl(165 68% 40%) 55%, hsl(185 65% 44%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(158 72% 40%), hsl(190 70% 45%));
+    --gradient-warm: linear-gradient(135deg, hsl(90 60% 45%), hsl(158 72% 40%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(158 72% 55% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(178 65% 55% / 0.18) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(95 60% 60% / 0.16) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(190 65% 60% / 0.14) 0px, transparent 55%);
+    --sidebar-background: 150 30% 97%;
+    --sidebar-foreground: 155 20% 28%;
+    --sidebar-primary: 158 72% 36%;
+    --sidebar-accent: 150 35% 93%;
+    --sidebar-accent-foreground: 158 50% 26%;
+    --sidebar-border: 150 22% 88%;
+    --sidebar-ring: 158 72% 36%;
+  }
+  /* ============== THEME: Forest Green (dark) ============== */
+  :root.dark[data-theme='forest'] {
+    --background: 158 30% 6%;
+    --foreground: 150 20% 94%;
+    --card: 158 25% 10%;
+    --card-foreground: 150 20% 94%;
+    --popover: 158 25% 10%;
+    --popover-foreground: 150 20% 94%;
+    --primary: 155 65% 52%;
+    --primary-foreground: 158 40% 7%;
+    --primary-glow: 140 60% 58%;
+    --secondary: 158 20% 17%;
+    --secondary-foreground: 150 40% 82%;
+    --muted: 158 18% 15%;
+    --muted-foreground: 150 12% 66%;
+    --accent: 158 25% 20%;
+    --accent-foreground: 150 40% 82%;
+    --border: 158 18% 19%;
+    --input: 158 18% 19%;
+    --ring: 155 65% 52%;
+    --brand-purple: 155 65% 52%;
+    --brand-pink: 172 65% 55%;
+    --brand-orange: 95 55% 55%;
+    --brand-yellow: 80 60% 58%;
+    --brand-teal: 172 65% 52%;
+    --brand-blue: 190 65% 55%;
+    --balance: 155 65% 52%;
+    --gradient-fun: linear-gradient(135deg, hsl(150 62% 42%) 0%, hsl(165 60% 44%) 55%, hsl(185 60% 48%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(158 62% 46%), hsl(190 62% 50%));
+    --gradient-warm: linear-gradient(135deg, hsl(90 55% 48%), hsl(158 62% 46%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(158 70% 30% / 0.4) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(178 65% 30% / 0.3) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(95 55% 30% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(190 60% 30% / 0.2) 0px, transparent 55%);
+    --sidebar-background: 158 30% 7%;
+    --sidebar-foreground: 150 15% 82%;
+    --sidebar-primary: 155 65% 52%;
+    --sidebar-accent: 158 20% 14%;
+    --sidebar-accent-foreground: 150 40% 82%;
+    --sidebar-border: 158 20% 15%;
+    --sidebar-ring: 155 65% 52%;
+  }
+
+  /* ============== THEME: Rose Blush (light) ============== */
+  :root[data-theme='rose']:not(.dark) {
+    --background: 340 40% 98%;
+    --foreground: 340 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 340 30% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 340 30% 12%;
+    --primary: 340 82% 56%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 320 85% 64%;
+    --secondary: 340 40% 96%;
+    --secondary-foreground: 340 55% 38%;
+    --muted: 340 22% 95%;
+    --muted-foreground: 340 12% 45%;
+    --accent: 340 45% 94%;
+    --accent-foreground: 340 55% 38%;
+    --border: 340 25% 91%;
+    --input: 340 25% 93%;
+    --ring: 340 82% 56%;
+    --brand-purple: 340 82% 56%;
+    --brand-pink: 320 82% 60%;
+    --brand-orange: 15 88% 62%;
+    --brand-yellow: 40 90% 60%;
+    --brand-teal: 300 60% 58%;
+    --brand-blue: 285 70% 62%;
+    --balance: 340 82% 56%;
+    --gradient-fun: linear-gradient(135deg, hsl(345 85% 60%) 0%, hsl(330 82% 60%) 55%, hsl(300 72% 60%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(340 82% 60%), hsl(285 70% 62%));
+    --gradient-warm: linear-gradient(135deg, hsl(15 88% 64%), hsl(340 82% 60%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(340 82% 72% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(320 82% 74% / 0.2) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(285 70% 74% / 0.16) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(15 88% 76% / 0.14) 0px, transparent 55%);
+    --sidebar-background: 340 40% 98%;
+    --sidebar-foreground: 340 18% 30%;
+    --sidebar-primary: 340 82% 56%;
+    --sidebar-accent: 340 40% 95%;
+    --sidebar-accent-foreground: 340 55% 38%;
+    --sidebar-border: 340 25% 91%;
+    --sidebar-ring: 340 82% 56%;
+  }
+  /* ============== THEME: Rose Blush (dark) ============== */
+  :root.dark[data-theme='rose'] {
+    --background: 335 28% 7%;
+    --foreground: 340 20% 95%;
+    --card: 335 24% 11%;
+    --card-foreground: 340 20% 95%;
+    --popover: 335 24% 11%;
+    --popover-foreground: 340 20% 95%;
+    --primary: 340 85% 68%;
+    --primary-foreground: 335 40% 8%;
+    --primary-glow: 320 85% 72%;
+    --secondary: 335 20% 18%;
+    --secondary-foreground: 340 45% 84%;
+    --muted: 335 18% 16%;
+    --muted-foreground: 340 12% 66%;
+    --accent: 335 24% 22%;
+    --accent-foreground: 340 45% 84%;
+    --border: 335 18% 21%;
+    --input: 335 18% 21%;
+    --ring: 340 85% 68%;
+    --brand-purple: 340 85% 68%;
+    --brand-pink: 320 82% 70%;
+    --brand-orange: 15 88% 68%;
+    --brand-yellow: 40 90% 66%;
+    --brand-teal: 300 60% 68%;
+    --brand-blue: 285 70% 70%;
+    --balance: 340 85% 68%;
+    --gradient-fun: linear-gradient(135deg, hsl(345 82% 62%) 0%, hsl(330 80% 64%) 55%, hsl(300 70% 64%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(340 80% 64%), hsl(285 70% 66%));
+    --gradient-warm: linear-gradient(135deg, hsl(15 85% 66%), hsl(340 80% 64%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(340 82% 42% / 0.38) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(320 80% 42% / 0.3) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(285 70% 42% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(15 85% 42% / 0.18) 0px, transparent 55%);
+    --sidebar-background: 335 28% 8%;
+    --sidebar-foreground: 340 15% 84%;
+    --sidebar-primary: 340 85% 68%;
+    --sidebar-accent: 335 20% 15%;
+    --sidebar-accent-foreground: 340 45% 84%;
+    --sidebar-border: 335 20% 16%;
+    --sidebar-ring: 340 85% 68%;
+  }
+
+  /* ============== THEME: Graphite Mono (light) ============== */
+  :root[data-theme='mono']:not(.dark) {
+    --background: 220 16% 97%;
+    --foreground: 220 25% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 10%;
+    --primary: 220 18% 22%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 220 14% 40%;
+    --secondary: 220 16% 94%;
+    --secondary-foreground: 220 20% 26%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 8% 44%;
+    --accent: 220 16% 92%;
+    --accent-foreground: 220 20% 26%;
+    --border: 220 14% 89%;
+    --input: 220 14% 91%;
+    --ring: 220 18% 22%;
+    --brand-purple: 220 18% 28%;
+    --brand-pink: 220 10% 48%;
+    --brand-orange: 30 12% 44%;
+    --brand-yellow: 45 14% 42%;
+    --brand-teal: 190 12% 40%;
+    --brand-blue: 220 20% 38%;
+    --balance: 220 18% 22%;
+    --gradient-fun: linear-gradient(135deg, hsl(220 20% 24%) 0%, hsl(220 14% 34%) 55%, hsl(220 10% 46%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(220 18% 26%), hsl(210 12% 46%));
+    --gradient-warm: linear-gradient(135deg, hsl(220 12% 36%), hsl(30 10% 46%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(220 18% 55% / 0.14) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(220 12% 60% / 0.12) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(210 12% 62% / 0.1) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(220 10% 65% / 0.1) 0px, transparent 55%);
+    --sidebar-background: 220 16% 97%;
+    --sidebar-foreground: 220 14% 28%;
+    --sidebar-primary: 220 18% 22%;
+    --sidebar-accent: 220 16% 93%;
+    --sidebar-accent-foreground: 220 20% 26%;
+    --sidebar-border: 220 14% 89%;
+    --sidebar-ring: 220 18% 22%;
+  }
+  /* ============== THEME: Graphite Mono (dark) ============== */
+  :root.dark[data-theme='mono'] {
+    --background: 220 18% 6%;
+    --foreground: 220 12% 95%;
+    --card: 220 15% 10%;
+    --card-foreground: 220 12% 95%;
+    --popover: 220 15% 10%;
+    --popover-foreground: 220 12% 95%;
+    --primary: 220 14% 82%;
+    --primary-foreground: 220 20% 9%;
+    --primary-glow: 220 10% 68%;
+    --secondary: 220 12% 17%;
+    --secondary-foreground: 220 14% 86%;
+    --muted: 220 12% 15%;
+    --muted-foreground: 220 8% 64%;
+    --accent: 220 12% 20%;
+    --accent-foreground: 220 14% 86%;
+    --border: 220 12% 20%;
+    --input: 220 12% 20%;
+    --ring: 220 14% 82%;
+    --brand-purple: 220 14% 80%;
+    --brand-pink: 220 10% 68%;
+    --brand-orange: 30 14% 66%;
+    --brand-yellow: 45 16% 68%;
+    --brand-teal: 190 12% 66%;
+    --brand-blue: 220 18% 72%;
+    --balance: 220 14% 82%;
+    --gradient-fun: linear-gradient(135deg, hsl(220 12% 30%) 0%, hsl(220 10% 42%) 55%, hsl(220 8% 56%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(220 12% 34%), hsl(210 10% 52%));
+    --gradient-warm: linear-gradient(135deg, hsl(220 10% 42%), hsl(30 10% 52%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(220 14% 40% / 0.3) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(220 10% 42% / 0.24) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(210 12% 44% / 0.18) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(220 8% 46% / 0.16) 0px, transparent 55%);
+    --sidebar-background: 220 18% 7%;
+    --sidebar-foreground: 220 10% 84%;
+    --sidebar-primary: 220 14% 82%;
+    --sidebar-accent: 220 12% 14%;
+    --sidebar-accent-foreground: 220 14% 86%;
+    --sidebar-border: 220 12% 15%;
+    --sidebar-ring: 220 14% 82%;
+  }
+
+
+  /* ============== THEME: candy (light) ============== */
+  :root[data-theme='candy']:not(.dark) {
+    --background: 330 40% 98%;
+    --foreground: 330 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 330 30% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 330 30% 12%;
+    --primary: 330 78% 52%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 285 80% 60%;
+    --secondary: 330 40% 95%;
+    --secondary-foreground: 330 55% 34%;
+    --muted: 330 20% 94%;
+    --muted-foreground: 330 12% 42%;
+    --accent: 285 45% 93%;
+    --accent-foreground: 330 55% 34%;
+    --border: 330 22% 89%;
+    --input: 330 22% 91%;
+    --ring: 330 78% 52%;
+    --brand-purple: 330 78% 55%;
+    --brand-pink: 285 78% 60%;
+    --brand-orange: 20 82% 55%;
+    --brand-yellow: 20 88% 58%;
+    --brand-teal: 285 60% 46%;
+    --brand-blue: 285 75% 56%;
+    --balance: 330 78% 52%;
+    --gradient-fun: linear-gradient(135deg, hsl(330 80% 54%) 0%, hsl(285 78% 58%) 55%, hsl(20 82% 58%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(330 78% 55%), hsl(285 78% 58%));
+    --gradient-warm: linear-gradient(135deg, hsl(285 78% 58%), hsl(20 84% 58%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(330 80% 70% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(285 78% 72% / 0.18) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(20 82% 72% / 0.14) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(330 70% 74% / 0.14) 0px, transparent 55%);
+    --sidebar-background: 330 40% 98%;
+    --sidebar-foreground: 330 20% 30%;
+    --sidebar-primary: 330 78% 52%;
+    --sidebar-accent: 330 40% 94%;
+    --sidebar-accent-foreground: 330 55% 34%;
+    --sidebar-border: 330 22% 89%;
+    --sidebar-ring: 330 78% 52%;
+  }
+
+  /* ============== THEME: candy (dark) ============== */
+  :root.dark[data-theme='candy'] {
+    --background: 330 32% 7%;
+    --foreground: 330 18% 95%;
+    --card: 330 28% 11%;
+    --card-foreground: 330 18% 95%;
+    --popover: 330 28% 11%;
+    --popover-foreground: 330 18% 95%;
+    --primary: 330 84% 66%;
+    --primary-foreground: 330 40% 8%;
+    --primary-glow: 285 84% 70%;
+    --secondary: 330 22% 18%;
+    --secondary-foreground: 330 40% 86%;
+    --muted: 330 20% 16%;
+    --muted-foreground: 330 12% 68%;
+    --accent: 285 28% 22%;
+    --accent-foreground: 330 40% 88%;
+    --border: 330 20% 22%;
+    --input: 330 20% 22%;
+    --ring: 330 84% 66%;
+    --brand-purple: 330 84% 70%;
+    --brand-pink: 285 82% 72%;
+    --brand-orange: 20 86% 66%;
+    --brand-yellow: 20 90% 68%;
+    --brand-teal: 285 66% 62%;
+    --brand-blue: 285 80% 70%;
+    --balance: 330 84% 66%;
+    --gradient-fun: linear-gradient(135deg, hsl(330 78% 52%) 0%, hsl(285 76% 56%) 55%, hsl(20 80% 56%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(330 78% 54%), hsl(285 76% 56%));
+    --gradient-warm: linear-gradient(135deg, hsl(285 76% 56%), hsl(20 82% 58%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(330 84% 46% / 0.3) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(285 80% 48% / 0.24) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(20 82% 48% / 0.18) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(330 70% 50% / 0.16) 0px, transparent 55%);
+    --sidebar-background: 330 32% 8%;
+    --sidebar-foreground: 330 14% 84%;
+    --sidebar-primary: 330 84% 66%;
+    --sidebar-accent: 330 22% 15%;
+    --sidebar-accent-foreground: 330 40% 88%;
+    --sidebar-border: 330 20% 16%;
+    --sidebar-ring: 330 84% 66%;
+  }
+
+  /* ============== THEME: cyber (light) ============== */
+  :root[data-theme='cyber']:not(.dark) {
+    --background: 190 40% 98%;
+    --foreground: 190 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 190 30% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 190 30% 12%;
+    --primary: 190 78% 52%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 265 80% 60%;
+    --secondary: 190 40% 95%;
+    --secondary-foreground: 190 55% 34%;
+    --muted: 190 20% 94%;
+    --muted-foreground: 190 12% 42%;
+    --accent: 265 45% 93%;
+    --accent-foreground: 190 55% 34%;
+    --border: 190 22% 89%;
+    --input: 190 22% 91%;
+    --ring: 190 78% 52%;
+    --brand-purple: 190 78% 55%;
+    --brand-pink: 265 78% 60%;
+    --brand-orange: 150 82% 55%;
+    --brand-yellow: 150 88% 58%;
+    --brand-teal: 265 60% 46%;
+    --brand-blue: 265 75% 56%;
+    --balance: 190 78% 52%;
+    --gradient-fun: linear-gradient(135deg, hsl(190 80% 54%) 0%, hsl(265 78% 58%) 55%, hsl(150 82% 58%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(190 78% 55%), hsl(265 78% 58%));
+    --gradient-warm: linear-gradient(135deg, hsl(265 78% 58%), hsl(150 84% 58%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(190 80% 70% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(265 78% 72% / 0.18) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(150 82% 72% / 0.14) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(190 70% 74% / 0.14) 0px, transparent 55%);
+    --sidebar-background: 190 40% 98%;
+    --sidebar-foreground: 190 20% 30%;
+    --sidebar-primary: 190 78% 52%;
+    --sidebar-accent: 190 40% 94%;
+    --sidebar-accent-foreground: 190 55% 34%;
+    --sidebar-border: 190 22% 89%;
+    --sidebar-ring: 190 78% 52%;
+  }
+
+  /* ============== THEME: cyber (dark) ============== */
+  :root.dark[data-theme='cyber'] {
+    --background: 190 32% 7%;
+    --foreground: 190 18% 95%;
+    --card: 190 28% 11%;
+    --card-foreground: 190 18% 95%;
+    --popover: 190 28% 11%;
+    --popover-foreground: 190 18% 95%;
+    --primary: 190 84% 66%;
+    --primary-foreground: 190 40% 8%;
+    --primary-glow: 265 84% 70%;
+    --secondary: 190 22% 18%;
+    --secondary-foreground: 190 40% 86%;
+    --muted: 190 20% 16%;
+    --muted-foreground: 190 12% 68%;
+    --accent: 265 28% 22%;
+    --accent-foreground: 190 40% 88%;
+    --border: 190 20% 22%;
+    --input: 190 20% 22%;
+    --ring: 190 84% 66%;
+    --brand-purple: 190 84% 70%;
+    --brand-pink: 265 82% 72%;
+    --brand-orange: 150 86% 66%;
+    --brand-yellow: 150 90% 68%;
+    --brand-teal: 265 66% 62%;
+    --brand-blue: 265 80% 70%;
+    --balance: 190 84% 66%;
+    --gradient-fun: linear-gradient(135deg, hsl(190 78% 52%) 0%, hsl(265 76% 56%) 55%, hsl(150 80% 56%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(190 78% 54%), hsl(265 76% 56%));
+    --gradient-warm: linear-gradient(135deg, hsl(265 76% 56%), hsl(150 82% 58%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(190 84% 46% / 0.3) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(265 80% 48% / 0.24) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(150 82% 48% / 0.18) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(190 70% 50% / 0.16) 0px, transparent 55%);
+    --sidebar-background: 190 32% 8%;
+    --sidebar-foreground: 190 14% 84%;
+    --sidebar-primary: 190 84% 66%;
+    --sidebar-accent: 190 22% 15%;
+    --sidebar-accent-foreground: 190 40% 88%;
+    --sidebar-border: 190 20% 16%;
+    --sidebar-ring: 190 84% 66%;
+  }
+
+  /* ============== THEME: sand (light) ============== */
+  :root[data-theme='sand']:not(.dark) {
+    --background: 32 40% 98%;
+    --foreground: 32 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 32 30% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 32 30% 12%;
+    --primary: 32 78% 52%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 15 80% 60%;
+    --secondary: 32 40% 95%;
+    --secondary-foreground: 32 55% 34%;
+    --muted: 32 20% 94%;
+    --muted-foreground: 32 12% 42%;
+    --accent: 15 45% 93%;
+    --accent-foreground: 32 55% 34%;
+    --border: 32 22% 89%;
+    --input: 32 22% 91%;
+    --ring: 32 78% 52%;
+    --brand-purple: 32 78% 55%;
+    --brand-pink: 15 78% 60%;
+    --brand-orange: 95 82% 55%;
+    --brand-yellow: 95 88% 58%;
+    --brand-teal: 15 60% 46%;
+    --brand-blue: 15 75% 56%;
+    --balance: 32 78% 52%;
+    --gradient-fun: linear-gradient(135deg, hsl(32 80% 54%) 0%, hsl(15 78% 58%) 55%, hsl(95 82% 58%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(32 78% 55%), hsl(15 78% 58%));
+    --gradient-warm: linear-gradient(135deg, hsl(15 78% 58%), hsl(95 84% 58%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(32 80% 70% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(15 78% 72% / 0.18) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(95 82% 72% / 0.14) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(32 70% 74% / 0.14) 0px, transparent 55%);
+    --sidebar-background: 32 40% 98%;
+    --sidebar-foreground: 32 20% 30%;
+    --sidebar-primary: 32 78% 52%;
+    --sidebar-accent: 32 40% 94%;
+    --sidebar-accent-foreground: 32 55% 34%;
+    --sidebar-border: 32 22% 89%;
+    --sidebar-ring: 32 78% 52%;
+  }
+
+  /* ============== THEME: sand (dark) ============== */
+  :root.dark[data-theme='sand'] {
+    --background: 32 32% 7%;
+    --foreground: 32 18% 95%;
+    --card: 32 28% 11%;
+    --card-foreground: 32 18% 95%;
+    --popover: 32 28% 11%;
+    --popover-foreground: 32 18% 95%;
+    --primary: 32 84% 66%;
+    --primary-foreground: 32 40% 8%;
+    --primary-glow: 15 84% 70%;
+    --secondary: 32 22% 18%;
+    --secondary-foreground: 32 40% 86%;
+    --muted: 32 20% 16%;
+    --muted-foreground: 32 12% 68%;
+    --accent: 15 28% 22%;
+    --accent-foreground: 32 40% 88%;
+    --border: 32 20% 22%;
+    --input: 32 20% 22%;
+    --ring: 32 84% 66%;
+    --brand-purple: 32 84% 70%;
+    --brand-pink: 15 82% 72%;
+    --brand-orange: 95 86% 66%;
+    --brand-yellow: 95 90% 68%;
+    --brand-teal: 15 66% 62%;
+    --brand-blue: 15 80% 70%;
+    --balance: 32 84% 66%;
+    --gradient-fun: linear-gradient(135deg, hsl(32 78% 52%) 0%, hsl(15 76% 56%) 55%, hsl(95 80% 56%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(32 78% 54%), hsl(15 76% 56%));
+    --gradient-warm: linear-gradient(135deg, hsl(15 76% 56%), hsl(95 82% 58%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(32 84% 46% / 0.3) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(15 80% 48% / 0.24) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(95 82% 48% / 0.18) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(32 70% 50% / 0.16) 0px, transparent 55%);
+    --sidebar-background: 32 32% 8%;
+    --sidebar-foreground: 32 14% 84%;
+    --sidebar-primary: 32 84% 66%;
+    --sidebar-accent: 32 22% 15%;
+    --sidebar-accent-foreground: 32 40% 88%;
+    --sidebar-border: 32 20% 16%;
+    --sidebar-ring: 32 84% 66%;
+  }
+
+  /* ============== THEME: arctic (light) ============== */
+  :root[data-theme='arctic']:not(.dark) {
+    --background: 200 40% 98%;
+    --foreground: 200 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 200 30% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 30% 12%;
+    --primary: 200 78% 52%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 225 80% 60%;
+    --secondary: 200 40% 95%;
+    --secondary-foreground: 200 55% 34%;
+    --muted: 200 20% 94%;
+    --muted-foreground: 200 12% 42%;
+    --accent: 225 45% 93%;
+    --accent-foreground: 200 55% 34%;
+    --border: 200 22% 89%;
+    --input: 200 22% 91%;
+    --ring: 200 78% 52%;
+    --brand-purple: 200 78% 55%;
+    --brand-pink: 225 78% 60%;
+    --brand-orange: 260 82% 55%;
+    --brand-yellow: 260 88% 58%;
+    --brand-teal: 225 60% 46%;
+    --brand-blue: 225 75% 56%;
+    --balance: 200 78% 52%;
+    --gradient-fun: linear-gradient(135deg, hsl(200 80% 54%) 0%, hsl(225 78% 58%) 55%, hsl(260 82% 58%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(200 78% 55%), hsl(225 78% 58%));
+    --gradient-warm: linear-gradient(135deg, hsl(225 78% 58%), hsl(260 84% 58%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(200 80% 70% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(225 78% 72% / 0.18) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(260 82% 72% / 0.14) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(200 70% 74% / 0.14) 0px, transparent 55%);
+    --sidebar-background: 200 40% 98%;
+    --sidebar-foreground: 200 20% 30%;
+    --sidebar-primary: 200 78% 52%;
+    --sidebar-accent: 200 40% 94%;
+    --sidebar-accent-foreground: 200 55% 34%;
+    --sidebar-border: 200 22% 89%;
+    --sidebar-ring: 200 78% 52%;
+  }
+
+  /* ============== THEME: arctic (dark) ============== */
+  :root.dark[data-theme='arctic'] {
+    --background: 200 32% 7%;
+    --foreground: 200 18% 95%;
+    --card: 200 28% 11%;
+    --card-foreground: 200 18% 95%;
+    --popover: 200 28% 11%;
+    --popover-foreground: 200 18% 95%;
+    --primary: 200 84% 66%;
+    --primary-foreground: 200 40% 8%;
+    --primary-glow: 225 84% 70%;
+    --secondary: 200 22% 18%;
+    --secondary-foreground: 200 40% 86%;
+    --muted: 200 20% 16%;
+    --muted-foreground: 200 12% 68%;
+    --accent: 225 28% 22%;
+    --accent-foreground: 200 40% 88%;
+    --border: 200 20% 22%;
+    --input: 200 20% 22%;
+    --ring: 200 84% 66%;
+    --brand-purple: 200 84% 70%;
+    --brand-pink: 225 82% 72%;
+    --brand-orange: 260 86% 66%;
+    --brand-yellow: 260 90% 68%;
+    --brand-teal: 225 66% 62%;
+    --brand-blue: 225 80% 70%;
+    --balance: 200 84% 66%;
+    --gradient-fun: linear-gradient(135deg, hsl(200 78% 52%) 0%, hsl(225 76% 56%) 55%, hsl(260 80% 56%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(200 78% 54%), hsl(225 76% 56%));
+    --gradient-warm: linear-gradient(135deg, hsl(225 76% 56%), hsl(260 82% 58%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(200 84% 46% / 0.3) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(225 80% 48% / 0.24) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(260 82% 48% / 0.18) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(200 70% 50% / 0.16) 0px, transparent 55%);
+    --sidebar-background: 200 32% 8%;
+    --sidebar-foreground: 200 14% 84%;
+    --sidebar-primary: 200 84% 66%;
+    --sidebar-accent: 200 22% 15%;
+    --sidebar-accent-foreground: 200 40% 88%;
+    --sidebar-border: 200 20% 16%;
+    --sidebar-ring: 200 84% 66%;
+  }
+
+
+  .dark {
+    --background: 245 30% 7%;
+    --foreground: 240 20% 95%;
+
+    --card: 245 25% 12%;
+    --card-foreground: 240 20% 95%;
+
+    --popover: 245 25% 12%;
+    --popover-foreground: 240 20% 95%;
+
+    --primary: 250 90% 70%;
+    --primary-foreground: 245 40% 8%;
+    --primary-glow: 265 88% 72%;
+
+    --secondary: 245 22% 18%;
+    --secondary-foreground: 245 50% 82%;
+
+    --muted: 245 20% 16%;
+    --muted-foreground: 240 12% 65%;
+
+    --accent: 250 30% 22%;
+    --accent-foreground: 245 50% 82%;
+
+    --destructive: 0 70% 58%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 245 20% 21%;
+    --input: 245 20% 21%;
+    --ring: 250 90% 70%;
+
+    --brand-purple: 250 90% 70%;
+    --brand-pink: 320 80% 68%;
+    --brand-orange: 25 95% 65%;
+    --brand-yellow: 45 95% 65%;
+    --brand-teal: 152 62% 55%;
+    --brand-blue: 220 85% 70%;
+
+    --income: 150 60% 58%;
+    --income-foreground: 245 40% 8%;
+    --income-bg: 150 40% 18%;
+
+    --expense: 350 80% 68%;
+    --expense-foreground: 245 40% 8%;
+    --expense-bg: 350 40% 20%;
+
+    --meeting: 250 85% 72%;
+    --meeting-foreground: 245 40% 8%;
+    --meeting-bg: 250 35% 22%;
+
+    --balance: 250 90% 70%;
+
+    --glass: 245 25% 13% / 0.82;
+    --glass-border: 245 25% 35% / 0.4;
+    --glass-shadow: 0 1px 2px 0 hsl(245 50% 3% / 0.3), 0 12px 32px -12px hsl(245 50% 3% / 0.6);
+
+    --card-shadow: 0 1px 2px 0 hsl(245 50% 3% / 0.35), 0 2px 8px -4px hsl(245 50% 3% / 0.25);
+    --card-shadow-hover: 0 10px 34px -12px hsl(245 50% 3% / 0.65), 0 2px 6px 0 hsl(245 50% 3% / 0.3);
+
+    --shadow-glow: 0 0 24px 0 hsl(var(--primary) / 0.35);
+    --shadow-pop: 0 8px 22px -6px hsl(var(--primary) / 0.4);
+
+    --gradient-fun: linear-gradient(135deg, hsl(248 84% 62%) 0%, hsl(258 85% 66%) 55%, hsl(275 80% 66%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(248 84% 65%), hsl(200 85% 60%));
+    --gradient-warm: linear-gradient(135deg, hsl(272 80% 66%), hsl(330 80% 66%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(248 84% 45% / 0.35) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(265 80% 45% / 0.28) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(220 85% 45% / 0.2) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(152 60% 40% / 0.16) 0px, transparent 55%);
+
+    --sidebar-background: 245 28% 9%;
+    --sidebar-foreground: 240 15% 84%;
+    --sidebar-primary: 250 90% 70%;
+    --sidebar-primary-foreground: 245 40% 8%;
+    --sidebar-accent: 245 22% 16%;
+    --sidebar-accent-foreground: 245 50% 82%;
+    --sidebar-border: 245 22% 17%;
+    --sidebar-ring: 250 90% 70%;
+  }
+
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html, body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+    max-width: 100vw;
+    /* Disable pinch-zoom & double-tap zoom on mobile for an app-like feel */
+    touch-action: pan-x pan-y;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  /* Prevent any rogue child from blowing out viewport width on mobile */
+  #root { overflow-x: hidden; max-width: 100vw; }
+  /* No iOS input auto-zoom: keep font-size >= 16px on form controls */
+  @media (max-width: 767px) {
+    input, select, textarea { font-size: 16px; }
+  }
+
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .card-shadow { box-shadow: var(--card-shadow); }
+  .card-shadow-hover { box-shadow: var(--card-shadow-hover); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .shadow-pop { box-shadow: var(--shadow-pop); }
+
+  /* On-gradient text + pill: fixed contrast on vivid gradient cards. */
+  .on-gradient { color: hsl(var(--on-gradient)); }
+  .on-gradient-soft { color: hsl(var(--on-gradient) / 0.82); }
+  .on-gradient-pill {
+    background: hsl(var(--on-gradient) / 0.96);
+    color: hsl(var(--on-gradient-ink));
+  }
+
+
+  .glass {
+    background: hsl(var(--glass));
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: var(--glass-shadow);
+  }
+  .glass-subtle {
+    background: hsl(var(--glass));
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid hsl(var(--glass-border));
+  }
+  /* iOS-style elevated surface */
+  .surface {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border) / 0.6);
+    box-shadow: var(--card-shadow);
+    border-radius: var(--radius);
+  }
+  .income-bg { background-color: hsl(var(--income-bg)); }
+  .expense-bg { background-color: hsl(var(--expense-bg)); }
+  .meeting-bg { background-color: hsl(var(--meeting-bg)); }
+  .income-text { color: hsl(var(--income)); }
+  .expense-text { color: hsl(var(--expense)); }
+  .meeting-text { color: hsl(var(--meeting)); }
+
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+  }
+  .gradient-fun { background: var(--gradient-fun); }
+  .gradient-cool { background: var(--gradient-cool); }
+  .gradient-warm { background: var(--gradient-warm); }
+  .gradient-mesh-bg { background-image: var(--gradient-mesh); }
+
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .gradient-text-fun {
+    background: var(--gradient-fun);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hover-lift {
+    transition: transform 0.3s var(--transition-bounce), box-shadow 0.3s var(--transition-smooth);
+  }
+  .hover-lift:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: var(--card-shadow-hover);
+  }
+  .tap-shrink {
+    transition: transform 0.15s var(--transition-bounce);
+  }
+  .tap-shrink:active {
+    transform: scale(0.94);
+  }
+
+  /* Minimum accessible touch target (44px iOS guideline, 40px compact) */
+  .tap-target {
+    min-height: 40px;
+    min-width: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tap-target-lg {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .h-safe-bottom {
+    height: env(safe-area-inset-bottom, 0);
+  }
+
+  /* Comfortable breathing room under the status bar / notch on every page */
+  .pt-safe-top {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1.5rem);
+  }
+  @media (min-width: 768px) {
+    .pt-safe-top { padding-top: 1.5rem; }
+  }
+
+  .animate-shake { animation: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+  .animate-slide-up-fade { animation: slide-up-fade 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+  /* ===== Card entrance + press animations ===== */
+  .card-enter {
+    animation: card-rise 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .card-press {
+    transition: transform 0.18s var(--transition-bounce), box-shadow 0.24s var(--transition-smooth);
+  }
+  .card-press:active {
+    transform: scale(0.985);
+  }
+  .card-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .card-sheen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 35%, hsl(0 0% 100% / 0.16) 50%, transparent 65%);
+    transform: translateX(-120%);
+    animation: sheen 5.5s ease-in-out 1.2s infinite;
+    pointer-events: none;
+  }
+  .animate-float-slow { animation: float-slow 7s ease-in-out infinite; }
+}
+
+@keyframes card-rise {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes sheen {
+  0%, 65% { transform: translateX(-120%); }
+  100%    { transform: translateX(120%); }
+}
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+@keyframes shake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-7px); }
+  40%, 60% { transform: translateX(7px); }
+}
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-enter, .card-sheen::after, .animate-float-slow { animation: none !important; }
+}
+
+

@@ -1,0 +1,25 @@
+{
+  "name": "ARUX Tracker",
+  "short_name": "ARUX",
+  "description": "ARUX — Personal Finance & Life Management",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0F0820",
+  "theme_color": "#9333EA",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+project_id = "ddtomvrthzkfyyltyxty"
+
+[functions.send-push]
+verify_jwt = false
+
+[functions.dispatch-due-reminders]
+verify_jwt = false
+
+[functions.share-task-list]
+verify_jwt = false
+
+[functions.accept-list-invite]
+verify_jwt = false
+
+[functions.monthly-insights]
+verify_jwt = false
