@@ -90,19 +90,19 @@ export function useNotificationCenter({
     // 1. GREETING & MOTIVATION (Dynamic daily)
     // ==========================================
     let greetingPeriod = 'morning';
-    let greetingTitle = `Good morning, ${firstName || 'Champion'}! ☀️`;
+    let greetingTitle = `Good morning, ${firstName || 'there'}!`;
     let greetingMsg = 'Start your day with clarity. Review your top priorities and keep your momentum going.';
     if (hour >= 12 && hour < 17) {
       greetingPeriod = 'afternoon';
-      greetingTitle = `Good afternoon, ${firstName || 'Champion'}! 🌤️`;
+      greetingTitle = `Good afternoon, ${firstName || 'there'}!`;
       greetingMsg = "You're halfway through the day. Log any expenses and check off completed tasks.";
     } else if (hour >= 17 && hour < 21) {
       greetingPeriod = 'evening';
-      greetingTitle = `Good evening, ${firstName || 'Champion'}! 🌆`;
+      greetingTitle = `Good evening, ${firstName || 'there'}!`;
       greetingMsg = "Wrap up your day by reviewing today's progress and setting a quick plan for tomorrow.";
     } else if (hour >= 21 || hour < 5) {
       greetingPeriod = 'night';
-      greetingTitle = `Good night, ${firstName || 'Champion'}! 🌙`;
+      greetingTitle = `Good night, ${firstName || 'there'}!`;
       greetingMsg = 'Rest up and recharge. Your finances, tasks, and habits are safely tracked in ARUX.';
     }
 
@@ -114,8 +114,6 @@ export function useNotificationCenter({
       message: greetingMsg,
       timestamp: 'Today',
       iconType: 'greeting',
-      badge: 'Greeting',
-      badgeColor: 'teal',
       isRead: readIds.has(greetingId),
       priority: 'normal',
     });
