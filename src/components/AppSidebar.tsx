@@ -1,12 +1,22 @@
 import { LayoutDashboard, TrendingUp, ShoppingBag, Calendar, Settings, LogOut, CheckSquare, Flame, Bell, Lightbulb, ShoppingCart, Car, FileBarChart, Scissors, Wallet, CreditCard, CalendarDays, ArrowLeftRight } from 'lucide-react';
-import { TabId } from '@/types';
+import { TabId, Task, Meeting, Budget, Subscription, LentBorrowEntry, Habit, HabitLog, Expense } from '@/types';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { BrandMark } from '@/components/BrandMark';
+import { NotificationCenter } from '@/components/NotificationCenter';
 
 interface AppSidebarProps {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
+  tasks?: Task[];
+  meetings?: Meeting[];
+  budgets?: Budget[];
+  subscriptions?: Subscription[];
+  lentBorrowEntries?: LentBorrowEntry[];
+  habits?: Habit[];
+  habitLogs?: HabitLog[];
+  expenses?: Expense[];
+  currency?: string;
 }
 
 const SECTIONS: { title: string; tabs: { id: TabId; label: string; icon: React.ComponentType<{ className?: string; strokeWidth?: string | number }> }[] }[] = [
@@ -54,15 +64,40 @@ const SECTIONS: { title: string; tabs: { id: TabId; label: string; icon: React.C
   },
 ];
 
-export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
+export function AppSidebar({
+  activeTab,
+  onTabChange,
+  tasks,
+  meetings,
+  budgets,
+  subscriptions,
+  lentBorrowEntries,
+  habits,
+  habitLogs,
+  expenses,
+  currency,
+}: AppSidebarProps) {
   const { user, signOut } = useAuth();
 
   return (
     <aside className="hidden md:flex flex-col w-64 min-h-screen border-r border-border/60 bg-sidebar/70 backdrop-blur-xl px-3 py-4 gap-1 sticky top-0 max-h-screen">
-      <div className="flex items-center px-2 py-2 mb-3">
-        <div className="w-32 shrink-0 px-1">
+      <div className="flex items-center justify-between px-2 py-2 mb-3">
+        <div className="w-28 shrink-0 px-1">
           <BrandMark className="w-full" />
         </div>
+        <NotificationCenter
+          tasks={tasks}
+          meetings={meetings}
+          budgets={budgets}
+          subscriptions={subscriptions}
+          lentBorrowEntries={lentBorrowEntries}
+          habits={habits}
+          habitLogs={habitLogs}
+          expenses={expenses}
+          currency={currency}
+          onNavigate={onTabChange}
+          className="w-9 h-9 rounded-xl"
+        />
       </div>
 
       <nav className="flex flex-col gap-4 flex-1 overflow-y-auto scrollbar-hide px-1">

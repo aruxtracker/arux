@@ -130,6 +130,7 @@ const Index = () => {
 
         return <DashboardPage incomes={incomes} expenses={expenses} budgets={budgets} subscriptions={subscriptions}
           upcomingMeetings={upcomingMeetings} meetings={meetings} tasks={tasks} ideas={ideas} reminders={reminders}
+          lentBorrowEntries={lentBorrowEntries} habits={habits} habitLogs={habitLogs}
           currency={settings.currency}
           getMonthlyStats={getMonthlyStats} getAllTimeBalance={getAllTimeBalance}
           onNavigate={handleTabChange} onResetBalance={resetFinances} />;
@@ -190,7 +191,19 @@ const Index = () => {
     <AppLockGate>
       {showOnboarding && <Onboarding onDone={() => setShowOnboarding(false)} />}
       <div className="min-h-screen h-screen bg-background gradient-mesh-bg flex overflow-x-hidden max-w-[100vw]">
-        <AppSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+        <AppSidebar
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          tasks={tasks}
+          meetings={meetings}
+          budgets={budgets}
+          subscriptions={subscriptions}
+          lentBorrowEntries={lentBorrowEntries}
+          habits={habits}
+          habitLogs={habitLogs}
+          expenses={expenses}
+          currency={settings.currency}
+        />
         <div className="flex-1 flex justify-center min-h-0">
           <div className="w-full max-w-2xl flex flex-col relative min-h-0">
             <PullToRefresh onRefresh={handleRefresh} className="pb-24 md:pb-8 pt-safe-top">

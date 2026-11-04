@@ -4,7 +4,7 @@ import {
   ArrowUpRight, ArrowDownRight, Calendar, ChevronRight, Plus, RotateCcw,
   CheckSquare, FileBarChart, Flame, Car, Scissors, Lightbulb, ShoppingCart, Bell,
 } from 'lucide-react';
-import { Income, Expense, Meeting, TabId, Budget, Subscription, Task, Idea, Reminder } from '@/types';
+import { Income, Expense, Meeting, TabId, Budget, Subscription, Task, Idea, Reminder, LentBorrowEntry, Habit, HabitLog } from '@/types';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { SmartInsights } from '@/components/SmartInsights';
@@ -12,6 +12,7 @@ import { GlobalSearch } from '@/components/GlobalSearch';
 import { Button } from '@/components/ui/button';
 import { useProfile } from '@/hooks/useProfile';
 import { getAvatar } from '@/lib/avatars';
+import { NotificationCenter } from '@/components/NotificationCenter';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
@@ -27,6 +28,9 @@ interface DashboardPageProps {
   tasks: Task[];
   ideas: Idea[];
   reminders: Reminder[];
+  lentBorrowEntries?: LentBorrowEntry[];
+  habits?: Habit[];
+  habitLogs?: HabitLog[];
   currency: string;
   getMonthlyStats: (year: number, month: number) => { totalIncome: number; totalExpenses: number; balance: number };
   getAllTimeBalance: () => { totalIncome: number; totalExpenses: number; balance: number };
@@ -68,7 +72,25 @@ const SHORTCUTS: { id: TabId; label: string; icon: React.ComponentType<{ classNa
   { id: 'meetings', label: 'Meets', icon: Calendar, tint: 'var(--meeting)' },
 ];
 
-export function DashboardPage({ incomes, expenses, budgets, subscriptions, upcomingMeetings, meetings, tasks, ideas, reminders, currency, getMonthlyStats, getAllTimeBalance, onNavigate, onResetBalance }: DashboardPageProps) {
+export function DashboardPage({
+  incomes,
+  expenses,
+  budgets,
+  subscriptions,
+  upcomingMeetings,
+  meetings,
+  tasks,
+  ideas,
+  reminders,
+  lentBorrowEntries,
+  habits,
+  habitLogs,
+  currency,
+  getMonthlyStats,
+  getAllTimeBalance,
+  onNavigate,
+  onResetBalance,
+}: DashboardPageProps) {
   const { user } = useAuth();
   const { profile } = useProfile();
   const avatar = getAvatar(profile.avatarPreset);
@@ -109,20 +131,34 @@ export function DashboardPage({ incomes, expenses, budgets, subscriptions, upcom
             {firstName ? `Hi ${firstName}, ` : ''}<span className="gradient-text-fun">{getGreeting()}</span>
           </h1>
         </div>
-        <button
-          onClick={() => onNavigate?.('settings')}
-          aria-label="Open your profile"
-          className={cn(
-            'w-12 h-12 md:w-14 md:h-14 rounded-full shrink-0 flex items-center justify-center shadow-pop tap-shrink bg-gradient-to-br',
-            avatar ? avatar.ring : 'from-primary to-accent'
-          )}
-        >
-          {avatar
-            ? <span className="text-2xl md:text-3xl leading-none">{avatar.emoji}</span>
-            : <span className="text-lg md:text-xl font-extrabold text-primary-foreground">
-                {(firstName || 'A').slice(0, 2).toUpperCase()}
-              </span>}
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <NotificationCenter
+            tasks={tasks}
+            meetings={meetings}
+            budgets={budgets}
+            subscriptions={subscriptions}
+            lentBorrowEntries={lentBorrowEntries}
+            habits={habits}
+            habitLogs={habitLogs}
+            expenses={expenses}
+            currency={currency}
+            onNavigate={onNavigate}
+          />
+          <button
+            onClick={() => onNavigate?.('settings')}
+            aria-label="Open your profile"
+            className={cn(
+              'w-11 h-11 md:w-12 md:h-12 rounded-full shrink-0 flex items-center justify-center shadow-pop tap-shrink bg-gradient-to-br',
+              avatar ? avatar.ring : 'from-primary to-accent'
+            )}
+          >
+            {avatar
+              ? <span className="text-2xl md:text-3xl leading-none">{avatar.emoji}</span>
+              : <span className="text-base md:text-lg font-extrabold text-primary-foreground">
+                  {(firstName || 'A').slice(0, 2).toUpperCase()}
+                </span>}
+          </button>
+        </div>
       </div>
 
       {/* Global search */}

@@ -29,6 +29,7 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { BrandMark } from '@/components/BrandMark';
+import { NotificationCenter } from '@/components/NotificationCenter';
 
 interface SettingsPageProps {
   settings: AppSettings;
@@ -615,6 +616,20 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
       <div className="flex flex-col gap-4 pb-2 w-full min-w-0 max-w-full overflow-x-hidden">
         <SubHeader title="Notifications" onBack={back} />
         <Group delay={40}>
+          <NotificationCenter
+            currency={settings.currency}
+            onNavigate={onNavigate}
+            trigger={
+              <button type="button" className="w-full text-left">
+                <Row
+                  icon={Bell}
+                  tint="var(--brand-purple)"
+                  title="Open Notification Center"
+                  subtitle="View daily greetings, tips, updates and alerts"
+                />
+              </button>
+            }
+          />
           <Row
             icon={Bell} tint="var(--brand-yellow)" title="In-app reminders"
             subtitle={
