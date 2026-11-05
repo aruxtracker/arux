@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Moon, Sun, Download, IndianRupee, LogOut, Instagram, Bell, Smartphone,
   Palette, CheckCircle2, Share2, Copy, ChevronRight, ChevronLeft, User,
   Database, Sparkles, ShieldCheck, Fingerprint, Lock, GraduationCap, Mail, CalendarDays,
   Wallet, ListChecks, Flame, Car, BarChart3, Bookmark, KeyRound, Save, Rocket, History,
   Grid2X2, TrendingUp, CreditCard, Scissors, Lightbulb, ShoppingCart, Calendar, Heart, Play,
-  UserRound, CircleUser,
-
+  UserRound, CircleUser, Crown,
 } from 'lucide-react';
 import { AppSettings, CURRENCIES, ThemeId, TabId } from '@/types';
 import { Income, Expense, Meeting } from '@/types';
@@ -137,6 +137,7 @@ function SubHeader({ title, onBack }: { title: string; onBack: () => void }) {
 /* ------------------------------ page ------------------------------ */
 
 export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, meetings, onNavigate, onStartTutorial }: SettingsPageProps) {
+  const navigate = useNavigate();
   const { user, signOut, updatePassword } = useAuth();
   const { profile, updateProfile } = useProfile();
   const [screen, setScreen] = useState<Screen>('root');
@@ -853,7 +854,17 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
         <Row icon={Share2} tint="var(--brand-purple)" title="Invite a friend" subtitle="Share ARUX with your contacts" onClick={() => setScreen('sharing')} />
       </Group>
 
-      <Group label="About" delay={160}>
+      <Group label="Administration" delay={160}>
+        <Row
+          icon={Crown}
+          tint="var(--brand-yellow)"
+          title="Super Admin Panel"
+          subtitle="Manage users, system broadcasts, feature flags & database"
+          onClick={() => navigate('/admin')}
+        />
+      </Group>
+
+      <Group label="About" delay={180}>
         <Row icon={Rocket} tint="var(--brand-purple)" title="Coming soon" subtitle={`${ROADMAP.length} features on the roadmap`} onClick={() => setScreen('comingsoon')} />
         <Row icon={History} tint="var(--brand-teal)" title="What's new" subtitle={`Version ${APP_VERSION} · changelog and fixes`} onClick={() => setScreen('whatsnew')} />
       </Group>

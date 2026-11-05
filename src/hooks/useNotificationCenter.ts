@@ -5,6 +5,7 @@ import { AppNotification } from '@/types/notifications';
 import { APP_VERSION, CHANGELOG } from '@/lib/version';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const READ_STORAGE_KEY = 'arux_notifications_read_v1';
 const DISMISSED_STORAGE_KEY = 'arux_notifications_dismissed_v1';
@@ -52,6 +53,34 @@ export function useNotificationCenter({
       return new Set();
     }
   });
+
+  const [dbBroadcasts, setDbBroadcasts] = useState<any[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    supabase
+      .from('system_broadcasts' as any)
+      .select('*')
+      .eq('active', true)
+      .then(({ data, error }) => {
+        if (!isMounted) return;
+        if (!error && data && Array.isArray(data)) {
+          setDbBroadcasts(data);
+        } else {
+          try {
+            const stored = localStorage.getItem('arux_admin_broadcasts_v1');
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              setDbBroadcasts(parsed.filter((b: any) => b.active));
+            }
+          } catch {}
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Save to localStorage when state updates
   useEffect(() => {
@@ -155,6 +184,27 @@ export function useNotificationCenter({
       badgeColor: 'blue',
       isRead: readIds.has(roadmapNotificationId),
       priority: 'low',
+    });
+
+    // ==========================================
+    // 2b. REAL DATABASE SYSTEM BROADCASTS
+    // ==========================================
+    dbBroadcasts.forEach((b: any) => {
+      const bId = `broadcast-${b.id}`;
+      list.push({
+        id: bId,
+        category: b.category || 'update',
+        title: b.title,
+        message: b.message,
+        timestamp: 'Announcement',
+        iconType: b.category === 'alert' ? 'reminder' : b.category === 'info' ? 'tip' : 'update',
+        actionLabel: b.action_label || (b.action_tab ? `Go to ${b.action_tab}` : undefined),
+        actionTab: b.action_tab,
+        badge: b.priority === 'high' ? 'Urgent' : 'Broadcast',
+        badgeColor: b.priority === 'high' ? 'rose' : 'purple',
+        isRead: readIds.has(bId),
+        priority: b.priority || 'normal',
+      });
     });
 
     // ==========================================
@@ -429,6 +479,7 @@ export function useNotificationCenter({
     habits,
     habitLogs,
     currency,
+    dbBroadcasts,
   ]);
 
   // Filter out dismissed notifications

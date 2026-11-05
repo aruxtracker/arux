@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, ShoppingBag, Settings, CheckSquare, Grid2X2,
   TrendingUp, Wallet, ArrowLeftRight, BarChart3, CreditCard, CalendarDays,
-  Calendar, Flame, Bell, Scissors, Car, Lightbulb, ShoppingCart, FileBarChart, X,
+  Calendar, Flame, Bell, Scissors, Car, Lightbulb, ShoppingCart, FileBarChart, X, Crown,
 } from 'lucide-react';
 import { TabId } from '@/types';
 import { cn } from '@/lib/utils';
@@ -36,6 +37,7 @@ const MORE_ITEMS: { id: TabId; label: string; icon: React.ComponentType<{ classN
 ];
 
 export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
+  const navigate = useNavigate();
   const [moreOpen, setMoreOpen] = useState(false);
   const moreActive = MORE_ITEMS.some((item) => item.id === activeTab);
 
@@ -64,6 +66,29 @@ export function BottomNav({ activeTab, onTabChange }: BottomNavProps) {
                 <X className="w-4 h-4" />
               </button>
             </div>
+
+            {/* Super Admin Quick Access */}
+            <button
+              onClick={() => {
+                setMoreOpen(false);
+                navigate('/admin');
+              }}
+              className="w-full mb-3 p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 to-primary/15 border border-amber-500/30 flex items-center justify-between text-left tap-shrink active:scale-[0.98] transition-all"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                  <Crown className="w-4 h-4" />
+                </span>
+                <div>
+                  <p className="text-xs font-bold text-foreground">Super Admin Console</p>
+                  <p className="text-[10px] text-muted-foreground">Manage users, broadcasts & system</p>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 uppercase tracking-wider">
+                Root
+              </span>
+            </button>
+
             <div className="grid grid-cols-3 gap-2">
               {MORE_ITEMS.map(({ id, label, icon: Icon, tint }) => (
                 <button

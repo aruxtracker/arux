@@ -1,4 +1,5 @@
-import { LayoutDashboard, TrendingUp, ShoppingBag, Calendar, Settings, LogOut, CheckSquare, Flame, Bell, Lightbulb, ShoppingCart, Car, FileBarChart, Scissors, Wallet, CreditCard, CalendarDays, ArrowLeftRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { LayoutDashboard, TrendingUp, ShoppingBag, Calendar, Settings, LogOut, CheckSquare, Flame, Bell, Lightbulb, ShoppingCart, Car, FileBarChart, Scissors, Wallet, CreditCard, CalendarDays, ArrowLeftRight, Crown } from 'lucide-react';
 import { TabId, Task, Meeting, Budget, Subscription, LentBorrowEntry, Habit, HabitLog, Expense } from '@/types';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -77,6 +78,7 @@ export function AppSidebar({
   expenses,
   currency,
 }: AppSidebarProps) {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
 
   return (
@@ -137,12 +139,23 @@ export function AppSidebar({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-foreground font-semibold truncate">{user.email}</p>
-              <button
-                onClick={signOut}
-                className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-destructive transition-colors mt-0.5"
-              >
-                <LogOut className="w-3 h-3" /> Sign out
-              </button>
+              <div className="flex items-center gap-2 mt-0.5">
+                <button
+                  type="button"
+                  onClick={() => navigate('/admin')}
+                  className="flex items-center gap-1 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
+                >
+                  <Crown className="w-3 h-3" /> Admin
+                </button>
+                <span className="text-muted-foreground/40 text-[10px]">•</span>
+                <button
+                  type="button"
+                  onClick={signOut}
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-destructive transition-colors"
+                >
+                  <LogOut className="w-3 h-3" /> Sign out
+                </button>
+              </div>
             </div>
           </>
         )}
