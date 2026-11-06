@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   LayoutDashboard, ShoppingBag, Settings, CheckSquare, Grid2X2,
   TrendingUp, Wallet, ArrowLeftRight, BarChart3, CreditCard, CalendarDays,
-  Calendar, Flame, Bell, Scissors, Car, Lightbulb, ShoppingCart, FileBarChart, X,
+  Calendar, Flame, Bell, Scissors, Car, Lightbulb, ShoppingCart, FileBarChart, X, UtensilsCrossed,
 } from 'lucide-react';
 import { TabId } from '@/types';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,7 @@ const TABS: { id: TabId; label: string; icon: React.ComponentType<{ className?: 
 ];
 
 const MORE_ITEMS: { id: TabId; label: string; icon: React.ComponentType<{ className?: string }>; tint: string }[] = [
+  { id: 'groceries', label: 'Groceries', icon: UtensilsCrossed, tint: 'hsl(var(--brand-orange))' },
   { id: 'income', label: 'Income', icon: TrendingUp, tint: 'hsl(var(--income))' },
   { id: 'lentborrow', label: 'Lent & Borrow', icon: ArrowLeftRight, tint: 'hsl(var(--brand-teal))' },
   { id: 'budgets', label: 'Budgets', icon: BarChart3, tint: 'hsl(var(--brand-blue))' },

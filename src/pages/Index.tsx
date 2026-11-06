@@ -23,6 +23,7 @@ import { BudgetsPage } from './BudgetsPage';
 import { SubscriptionsPage } from './SubscriptionsPage';
 import { CalendarPage } from './CalendarPage';
 import { LentBorrowPage } from './LentBorrowPage';
+import { GroceryPage } from './GroceryPage';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { DashboardSkeleton, PageSkeleton } from '@/components/Skeletons';
@@ -139,6 +140,8 @@ const Index = () => {
         return <IncomePage incomes={incomes} bankAccounts={bankAccounts} currency={settings.currency} onAdd={addIncome} onUpdate={updateIncome} onDelete={deleteIncome} onAddAccount={addBankAccount} onUpdateAccount={updateBankAccount} onDeleteAccount={deleteBankAccount} />;
       case 'expenses':
         return <ExpensesPage expenses={expenses} currency={settings.currency} onAdd={addExpense} onUpdate={updateExpense} onDelete={deleteExpense} />;
+      case 'groceries':
+        return <GroceryPage currency={settings.currency} onAddExpense={addExpense} onNavigate={handleTabChange} />;
       case 'lentborrow':
         return <LentBorrowPage entries={lentBorrowEntries} currency={settings.currency} onAdd={addLentBorrow} onUpdate={updateLentBorrow} onDelete={deleteLentBorrow} />;
       case 'meetings':

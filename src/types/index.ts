@@ -278,7 +278,9 @@ export const DREAM_CATEGORIES = [
   { value: 'health', label: 'Health & Fitness', emoji: '💪' },
 ];
 
-export type TabId = 'dashboard' | 'income' | 'expenses' | 'lentborrow' | 'meetings' | 'tasks' | 'reports' | 'habits' | 'reminders' | 'ideas' | 'dreambucket' | 'vehicles' | 'grooming' | 'budgets' | 'subscriptions' | 'calendar' | 'settings';
+export type TabId = 'dashboard' | 'income' | 'expenses' | 'groceries' | 'lentborrow' | 'meetings' | 'tasks' | 'reports' | 'habits' | 'reminders' | 'ideas' | 'dreambucket' | 'vehicles' | 'grooming' | 'budgets' | 'subscriptions' | 'calendar' | 'settings';
+
+export * from './grocery';
 
 // Grooming tracker (haircut, beard, spa, etc.)
 export type GroomingType = 'haircut' | 'beard' | 'spa' | 'facial' | 'massage' | 'manicure' | 'pedicure' | 'other';

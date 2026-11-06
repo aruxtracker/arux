@@ -6,7 +6,7 @@ import {
   Database, Sparkles, ShieldCheck, Fingerprint, Lock, GraduationCap, Mail, CalendarDays,
   Wallet, ListChecks, Flame, Car, BarChart3, Bookmark, KeyRound, Save, Rocket, History,
   Grid2X2, TrendingUp, CreditCard, Scissors, Lightbulb, ShoppingCart, Calendar, Heart, Play,
-  UserRound, CircleUser, Crown,
+  UserRound, CircleUser, Crown, UtensilsCrossed,
 } from 'lucide-react';
 import { AppSettings, CURRENCIES, ThemeId, TabId } from '@/types';
 import { Income, Expense, Meeting } from '@/types';
@@ -50,6 +50,7 @@ type Screen =
 const ALL_FEATURES: { id: TabId; label: string; icon: any; tint: string }[] = [
   { id: 'income', label: 'Income', icon: TrendingUp, tint: 'var(--income)' },
   { id: 'expenses', label: 'Spend', icon: Wallet, tint: 'var(--expense)' },
+  { id: 'groceries', label: 'Groceries', icon: UtensilsCrossed, tint: 'var(--brand-orange)' },
   { id: 'lentborrow', label: 'Lent & Borrow', icon: Wallet, tint: 'var(--brand-teal)' },
   { id: 'budgets', label: 'Budgets', icon: BarChart3, tint: 'var(--brand-blue)' },
   { id: 'subscriptions', label: 'Subs', icon: CreditCard, tint: 'var(--brand-purple)' },

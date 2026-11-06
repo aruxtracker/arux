@@ -8,7 +8,8 @@ const SCOPE_KEY = 'arux_cache_scope';
 
 export type CacheKey =
   | 'incomes' | 'expenses' | 'tasks' | 'taskLists' | 'subtasks'
-  | 'meetings' | 'reminders' | 'subscriptions' | 'budgets' | 'lentBorrowEntries' | 'bankAccounts';
+  | 'meetings' | 'reminders' | 'subscriptions' | 'budgets' | 'lentBorrowEntries' | 'bankAccounts'
+  | 'groceryLists' | 'groceryListItems' | 'groceryStock' | 'groceryStockMovements' | 'groceryActivity' | 'groceryHouseholds';
 
 /**
  * Caches are per-account. Whenever the signed-in user changes (or signs out)

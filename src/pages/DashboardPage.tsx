@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { format, isToday, isTomorrow } from 'date-fns';
 import {
   ArrowUpRight, ArrowDownRight, Calendar, ChevronRight, Plus, RotateCcw,
-  CheckSquare, FileBarChart, Flame, Car, Scissors, Lightbulb, ShoppingCart, Bell,
+  CheckSquare, FileBarChart, Flame, Car, Scissors, Lightbulb, ShoppingCart, Bell, UtensilsCrossed,
 } from 'lucide-react';
 import { Income, Expense, Meeting, TabId, Budget, Subscription, Task, Idea, Reminder, LentBorrowEntry, Habit, HabitLog } from '@/types';
 import { cn } from '@/lib/utils';
@@ -61,6 +61,7 @@ function getGreeting() {
 const SHORTCUTS: { id: TabId; label: string; icon: React.ComponentType<{ className?: string }>; tint: string }[] = [
   { id: 'tasks', label: 'Tasks', icon: CheckSquare, tint: 'var(--brand-purple)' },
   { id: 'expenses', label: 'Spend', icon: ArrowDownRight, tint: 'var(--expense)' },
+  { id: 'groceries', label: 'Groceries', icon: UtensilsCrossed, tint: 'var(--brand-orange)' },
   { id: 'income', label: 'Income', icon: ArrowUpRight, tint: 'var(--income)' },
   { id: 'reports', label: 'Reports', icon: FileBarChart, tint: 'var(--brand-blue)' },
   { id: 'habits', label: 'Habits', icon: Flame, tint: 'var(--brand-orange)' },

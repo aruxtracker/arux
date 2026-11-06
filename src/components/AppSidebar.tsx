@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, ShoppingBag, Calendar, Settings, LogOut, CheckSquare, Flame, Bell, Lightbulb, ShoppingCart, Car, FileBarChart, Scissors, Wallet, CreditCard, CalendarDays, ArrowLeftRight, Crown } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, ShoppingBag, Calendar, Settings, LogOut, CheckSquare, Flame, Bell, Lightbulb, ShoppingCart, Car, FileBarChart, Scissors, Wallet, CreditCard, CalendarDays, ArrowLeftRight, Crown, UtensilsCrossed } from 'lucide-react';
 import { TabId, Task, Meeting, Budget, Subscription, LentBorrowEntry, Habit, HabitLog, Expense } from '@/types';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -34,6 +34,7 @@ const SECTIONS: { title: string; tabs: { id: TabId; label: string; icon: React.C
     tabs: [
       { id: 'income', label: 'Income', icon: TrendingUp },
       { id: 'expenses', label: 'Expenses', icon: ShoppingBag },
+      { id: 'groceries', label: 'Groceries', icon: UtensilsCrossed },
       { id: 'lentborrow', label: 'Lent & Borrow', icon: ArrowLeftRight },
       { id: 'budgets', label: 'Budgets', icon: Wallet },
       { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },
