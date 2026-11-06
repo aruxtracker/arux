@@ -87,8 +87,8 @@ export function AppSidebar({
   return (
     <aside className="hidden md:flex flex-col w-64 min-h-screen border-r border-border/60 bg-sidebar/70 backdrop-blur-xl px-3 py-4 gap-1 sticky top-0 max-h-screen">
       <div className="flex items-center justify-between px-2 py-2 mb-3">
-        <div className="w-28 shrink-0 px-1">
-          <BrandMark className="w-full" />
+        <div className="w-36 shrink-0 px-1">
+          <BrandMark className="w-full" withMascot />
         </div>
         <NotificationCenter
           tasks={tasks}

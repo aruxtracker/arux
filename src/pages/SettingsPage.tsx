@@ -812,7 +812,7 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
   return (
     <div className="flex flex-col gap-4 pb-2 w-full min-w-0 max-w-full overflow-x-hidden">
       <div className="px-4 md:px-0 pt-2 flex items-center gap-3">
-        <BrandMark className="w-24 shrink-0" />
+        <BrandMark className="w-36 shrink-0" withMascot />
         <h1 className="text-2xl font-bold text-foreground">Settings</h1>
       </div>
 

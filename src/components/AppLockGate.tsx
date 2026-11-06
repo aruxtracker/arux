@@ -6,6 +6,7 @@ import {
   unlockWithBiometric, verifyPin, RELOCK_AFTER_MS,
 } from '@/lib/applock';
 import { BrandMark } from '@/components/BrandMark';
+import { AruxMascot } from '@/components/AruxMascot';
 
 const PIN_LENGTH = 4;
 
@@ -68,7 +69,8 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="fixed inset-0 z-[100] bg-background gradient-mesh-bg flex flex-col items-center justify-center px-8">
-      <BrandMark className="w-36 animate-float-slow" />
+      <AruxMascot size="xl" className="mb-4 animate-float-slow" />
+      <BrandMark className="w-32" />
       <div className="mt-4 flex items-center gap-2 text-muted-foreground">
         <Lock className="w-3.5 h-3.5" />
         <p className="text-xs font-semibold uppercase tracking-[0.18em]">ARUX is locked</p>

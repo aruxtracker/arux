@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { useProfile } from '@/hooks/useProfile';
 import { getAvatar } from '@/lib/avatars';
 import { NotificationCenter } from '@/components/NotificationCenter';
+import { AruxMascot } from '@/components/AruxMascot';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
@@ -124,10 +125,16 @@ export function DashboardPage({
     <div className="flex flex-col gap-5 pb-2 min-w-0">
       {/* Header */}
       <div className="px-4 md:px-0 pt-2 flex items-center gap-3 card-enter">
+        <AruxMascot size="md" className="tap-shrink" />
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] text-muted-foreground font-semibold tracking-wide">
-            {format(now, 'EEEE · d MMM')}
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-[11px] text-muted-foreground font-semibold tracking-wide">
+              {format(now, 'EEEE · d MMM')}
+            </p>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
+              Diwali ✨
+            </span>
+          </div>
           <h1 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight truncate">
             {firstName ? `Hi ${firstName}, ` : ''}<span className="gradient-text-fun">{getGreeting()}</span>
           </h1>

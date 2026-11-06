@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Lock, User, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { BrandMark } from '@/components/BrandMark';
+import { AruxMascot } from '@/components/AruxMascot';
 import { toast } from 'sonner';
 
 type AuthMode = 'login' | 'signup' | 'forgot';
@@ -51,10 +52,14 @@ export function AuthPage() {
 
       <div className="w-full max-w-md relative z-10">
         {/* Brand */}
-        <div className="flex flex-col items-center mb-8">
-          <BrandMark className="w-44 mb-4" />
+        <div className="flex flex-col items-center mb-6">
+          <AruxMascot size="xl" className="mb-3 animate-float-slow" />
+          <BrandMark className="w-36 mb-2" />
+          <div className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-[11px] font-bold">
+            <span>✨ Happy Diwali Edition ✨</span>
+          </div>
           <h1 className="sr-only">ARUX Tracker</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-2">
             {mode === 'login' ? 'Welcome back' : mode === 'signup' ? 'Create your account' : 'Reset your password'}
           </p>
         </div>

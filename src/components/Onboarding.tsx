@@ -45,7 +45,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
   return (
     <div className="fixed inset-0 z-[90] bg-background gradient-mesh-bg flex flex-col px-6 pt-[max(2rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
       <div className="flex items-center justify-between">
-        <BrandMark className="w-24 animate-float-slow" />
+        <BrandMark className="w-32 animate-float-slow" withMascot />
         {!last && (
           <button onClick={finish} className="text-sm font-semibold text-muted-foreground px-3 py-2 rounded-xl tap-shrink">
             Skip
