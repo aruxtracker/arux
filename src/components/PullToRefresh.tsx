@@ -54,6 +54,7 @@ export function PullToRefresh({ onRefresh, children, className }: PullToRefreshP
   return (
     <div
       ref={scrollRef}
+      data-pull-scroll="true"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={finish}

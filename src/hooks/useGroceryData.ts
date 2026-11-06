@@ -15,6 +15,17 @@ import {
 } from '@/types/grocery';
 import { toast } from 'sonner';
 
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 interface UseGroceryDataProps {
   onAddExpense?: (expense: { amount: number; category: any; date: string; notes?: string }) => Promise<void> | void;
 }
@@ -111,7 +122,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
       } else if (!lists.length) {
         // Create a default initial list if none exists
         const defaultList: GroceryList = {
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           household_id: activeHouseholdId,
           user_id: user.id,
           name: 'Monthly Shopping',
@@ -187,7 +198,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
   const logActivity = useCallback(async (action: string, itemName: string, details?: string) => {
     if (!user) return;
     const act: GroceryActivity = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       household_id: activeHouseholdId,
       user_id: user.id,
       actor_name: userName,
@@ -210,7 +221,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
   const createList = async (name: string, color: string = '#10b981') => {
     if (!user) return;
     const newList: GroceryList = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       household_id: activeHouseholdId,
       user_id: user.id,
       name,
@@ -253,7 +264,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
     if (!sourceList || !user) return;
 
     const newList: GroceryList = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       household_id: activeHouseholdId,
       user_id: user.id,
       name: newName || `${sourceList.name} (Copy)`,
@@ -267,7 +278,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
     const sourceItems = listItems.filter((i) => i.list_id === listId);
     const copiedItems: GroceryListItem[] = sourceItems.map((item) => ({
       ...item,
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       list_id: newList.id,
       is_purchased: false,
       actual_price: null,
@@ -326,7 +337,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
     }
 
     const newItem: GroceryListItem = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       list_id: item.listId,
       household_id: activeHouseholdId,
       item_name: item.itemName.trim(),
@@ -458,7 +469,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
             .eq('id', existingStock.id);
         } catch {}
       } else {
-        targetStockId = crypto.randomUUID();
+        targetStockId = generateUUID();
         const newStockItem: GroceryStockItem = {
           id: targetStockId,
           household_id: activeHouseholdId,
@@ -488,7 +499,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
       // Log movement record
       if (targetStockId) {
         const movement: GroceryStockMovement = {
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           stock_id: targetStockId,
           household_id: activeHouseholdId,
           user_id: user.id,
@@ -588,7 +599,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
     }
 
     const newStock: GroceryStockItem = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       household_id: activeHouseholdId,
       user_id: user.id,
       item_name: data.itemName.trim(),
@@ -612,7 +623,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
 
     // Log movement
     const movement: GroceryStockMovement = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       stock_id: newStock.id,
       household_id: activeHouseholdId,
       user_id: user.id,
@@ -693,7 +704,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
 
     // Movement record
     const movement: GroceryStockMovement = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       stock_id: stockItem.id,
       household_id: activeHouseholdId,
       user_id: user.id,
@@ -743,7 +754,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
   const createHousehold = async (name: string) => {
     if (!user) return;
     const newH: GroceryHousehold = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       name: name.trim(),
       owner_id: user.id,
       code: Math.random().toString(36).substring(2, 8).toUpperCase(),

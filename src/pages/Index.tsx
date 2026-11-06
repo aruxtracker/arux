@@ -1,4 +1,5 @@
 import { useState, useEffect, useTransition, useCallback } from 'react';
+import { PageErrorBoundary } from '@/components/PageErrorBoundary';
 import { useAppData } from '@/hooks/useAppData';
 import { useReminderNotifications } from '@/hooks/useNotifications';
 import { applyTheme } from '@/lib/themes';
@@ -120,6 +121,12 @@ const Index = () => {
   // Non-blocking tab switch: keeps current screen interactive while the next renders
   const handleTabChange = useCallback((tab: TabId) => {
     startTransition(() => setActiveTab(tab));
+    try {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      document.querySelector('[data-pull-scroll]')?.scrollTo({ top: 0, behavior: 'instant' });
+    } catch {
+      // ignore
+    }
   }, []);
 
   const renderPage = () => {
@@ -211,7 +218,9 @@ const Index = () => {
           <div className="w-full max-w-2xl flex flex-col relative min-w-0 max-w-full min-h-0">
             <PullToRefresh onRefresh={handleRefresh} className="pt-safe-top w-full min-w-0 max-w-full">
               <div className={`w-full min-w-0 max-w-full pb-36 md:pb-12 md:px-4 transition-opacity duration-200 ${isPending ? 'opacity-60' : 'opacity-100'}`}>
-                {renderPage()}
+                <PageErrorBoundary key={activeTab}>
+                  {renderPage()}
+                </PageErrorBoundary>
               </div>
             </PullToRefresh>
 
