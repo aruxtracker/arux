@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { GroceryHousehold, GroceryHouseholdMember } from '@/types/grocery';
-import { Users, Copy, Check, Plus, KeyRound, Building, CheckCircle2, Trash2, AlertTriangle } from 'lucide-react';
+import { Users, Copy, Check, Plus, KeyRound, Building, CheckCircle2, Trash2, AlertTriangle, CloudUpload, Wifi } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface HouseholdDialogProps {
@@ -17,6 +17,7 @@ interface HouseholdDialogProps {
   onSwitchHousehold: (id: string | null) => void;
   onCreateHousehold: (name: string) => void;
   onJoinHousehold: (code: string) => Promise<boolean>;
+  onSyncToCloud?: (h: GroceryHousehold) => Promise<boolean>;
   onDeleteHousehold?: (id: string) => void;
 }
 
@@ -30,6 +31,7 @@ export function HouseholdDialog({
   onSwitchHousehold,
   onCreateHousehold,
   onJoinHousehold,
+  onSyncToCloud,
   onDeleteHousehold,
 }: HouseholdDialogProps) {
   const [tab, setTab] = useState<'current' | 'create' | 'join'>('current');
@@ -37,9 +39,20 @@ export function HouseholdDialog({
   const [joinCode, setJoinCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const isOwner = activeHousehold && currentUserId && activeHousehold.owner_id === currentUserId;
+
+  const handleSync = async () => {
+    if (!activeHousehold || !onSyncToCloud) return;
+    setSyncing(true);
+    const ok = await onSyncToCloud(activeHousehold);
+    setSyncing(false);
+    if (ok) {
+      toast.success('Household synced to cloud! Roommates can now join using this code.');
+    }
+  };
 
   const handleCopyCode = () => {
     if (!activeHousehold?.code) return;
@@ -223,6 +236,20 @@ export function HouseholdDialog({
                     <span>{copied ? 'Copied' : 'Copy'}</span>
                   </Button>
                 </div>
+
+                {/* Cloud Sync Button */}
+                {isOwner && onSyncToCloud && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleSync}
+                    disabled={syncing}
+                    className="w-full h-9 rounded-xl text-xs font-bold border-primary/30 text-primary hover:bg-primary/10 gap-1.5 tap-shrink"
+                  >
+                    <CloudUpload className={`w-3.5 h-3.5 ${syncing ? 'animate-bounce' : ''}`} />
+                    <span>{syncing ? 'Syncing to Cloud...' : 'Sync Code to Cloud (Allow Friends to Join)'}</span>
+                  </Button>
+                )}
 
                 {/* Switch to Personal Mode */}
                 <Button

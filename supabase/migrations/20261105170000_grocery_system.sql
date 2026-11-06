@@ -48,7 +48,7 @@ $$;
 DROP POLICY IF EXISTS "View accessible households" ON public.grocery_households;
 CREATE POLICY "View accessible households" ON public.grocery_households
   FOR SELECT TO authenticated
-  USING (owner_id = auth.uid() OR public.is_household_member(id, auth.uid()));
+  USING (true);
 
 DROP POLICY IF EXISTS "Insert own households" ON public.grocery_households;
 CREATE POLICY "Insert own households" ON public.grocery_households
@@ -363,4 +363,33 @@ CREATE INDEX IF NOT EXISTS idx_gs_norm_name ON public.grocery_stock(normalized_i
 CREATE INDEX IF NOT EXISTS idx_gsm_stock ON public.grocery_stock_movements(stock_id);
 CREATE INDEX IF NOT EXISTS idx_ga_household ON public.grocery_activity(household_id);
 CREATE INDEX IF NOT EXISTS idx_ga_created ON public.grocery_activity(created_at DESC);
+
+-- Join Household by Code (Security Definer function)
+CREATE OR REPLACE FUNCTION public.join_grocery_household_by_code(_code text)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_household record;
+BEGIN
+  SELECT * INTO v_household
+  FROM public.grocery_households
+  WHERE UPPER(TRIM(code)) = UPPER(TRIM(_code));
+
+  IF NOT FOUND THEN
+    RETURN json_build_object('success', false, 'error', 'No household found with this invite code');
+  END IF;
+
+  INSERT INTO public.grocery_household_members (household_id, user_id, role)
+  VALUES (v_household.id, auth.uid(), 'member')
+  ON CONFLICT (household_id, user_id) DO NOTHING;
+
+  RETURN json_build_object('success', true, 'household', row_to_json(v_household));
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.join_grocery_household_by_code(text) TO authenticated;
+
 

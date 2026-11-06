@@ -751,6 +751,40 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
   // -------------------------------------------------------------
   // HOUSEHOLD SHARING
   // -------------------------------------------------------------
+  // Push a local household to Supabase so others can join it
+  const syncHouseholdToCloud = async (h: GroceryHousehold): Promise<boolean> => {
+    if (!user) return false;
+    try {
+      // Upsert household row
+      const { error: hErr } = await supabase
+        .from('grocery_households' as any)
+        .upsert(h, { onConflict: 'id' });
+
+      if (hErr) {
+        if (hErr.code === '42P01') {
+          toast.error(
+            'Grocery database tables are missing. Run the SQL migration in Supabase first.',
+            { duration: 6000 }
+          );
+        } else {
+          toast.error(`Could not sync to cloud: ${hErr.message}`);
+        }
+        return false;
+      }
+
+      // Upsert owner membership
+      await supabase.from('grocery_household_members' as any).upsert(
+        { household_id: h.id, user_id: user.id, role: 'owner' },
+        { onConflict: 'household_id,user_id' }
+      );
+
+      return true;
+    } catch {
+      toast.error('Network error while syncing. Check your connection.');
+      return false;
+    }
+  };
+
   const createHousehold = async (name: string) => {
     if (!user) return;
     const newH: GroceryHousehold = {
@@ -762,18 +796,20 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
       updated_at: new Date().toISOString(),
     };
 
+    // Save locally first (immediate UI feedback)
     setHouseholds((prev) => [newH, ...prev]);
     switchHousehold(newH.id);
-    toast.success(`Created shared household "${newH.name}". Share code: ${newH.code}`);
 
-    try {
-      await supabase.from('grocery_households' as any).insert(newH);
-      await supabase.from('grocery_household_members' as any).insert({
-        household_id: newH.id,
-        user_id: user.id,
-        role: 'owner',
-      });
-    } catch {}
+    // Sync to Supabase so friends can join
+    const synced = await syncHouseholdToCloud(newH);
+    if (synced) {
+      toast.success(`Household "${newH.name}" created! Share code: ${newH.code} 🎉`);
+    } else {
+      toast.warning(
+        `Household created locally. Code: ${newH.code}\n⚠️ Cloud sync failed — your friend may not be able to join yet.`,
+        { duration: 7000 }
+      );
+    }
   };
 
   const joinHouseholdByCode = async (code: string): Promise<boolean> => {
@@ -799,7 +835,30 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
       return true;
     }
 
-    // 2. Try Supabase lookup
+    // 2. Try RPC join first (SECURITY DEFINER - bypasses RLS lookup blocks safely)
+    try {
+      const { data: rpcData, error: rpcErr } = await supabase.rpc('join_grocery_household_by_code' as any, {
+        _code: cleanCode,
+      });
+
+      if (!rpcErr && rpcData) {
+        const result = typeof rpcData === 'string' ? JSON.parse(rpcData) : rpcData;
+        if (result?.success && result?.household) {
+          const h = result.household as GroceryHousehold;
+          setHouseholds((prev) => (prev.some((item) => item.id === h.id) ? prev : [h, ...prev]));
+          switchHousehold(h.id);
+          toast.success(`Joined household "${h.name}"! 🎉`);
+          return true;
+        } else if (result?.error && !result?.success) {
+          toast.error(result.error);
+          return false;
+        }
+      }
+    } catch {
+      // RPC may not exist yet, fall through to direct lookup
+    }
+
+    // 3. Fallback: direct Supabase lookup
     try {
       const { data: hData, error: hErr } = await supabase
         .from('grocery_households' as any)
@@ -808,17 +867,22 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
         .maybeSingle();
 
       if (hErr) {
-        // If table doesn't exist yet, suggest running migration
         if (hErr.code === '42P01') {
-          toast.error('Grocery tables not set up yet. Please ask admin to run the DB migration.');
+          toast.error(
+            '⚠️ Grocery database tables not found. The household owner must run the DB setup first.',
+            { duration: 7000 }
+          );
         } else {
-          toast.error(`Could not search households: ${hErr.message}`);
+          toast.error(`Search failed: ${hErr.message}`);
         }
         return false;
       }
 
       if (!hData) {
-        toast.error(`No household found with code "${cleanCode}". Check the code and try again.`);
+        toast.error(
+          `No household found with code "${cleanCode}".\n\nTips:\n• Double-check the code\n• Ask the owner to tap "Sync to Cloud" in their Household settings\n• The owner must be signed in to the same app`,
+          { duration: 8000 }
+        );
         return false;
       }
 
@@ -890,6 +954,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
     activeHouseholdId,
     switchHousehold,
     createHousehold,
+    syncHouseholdToCloud,
     joinHouseholdByCode,
     deleteHousehold,
     members,

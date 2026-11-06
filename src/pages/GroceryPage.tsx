@@ -54,6 +54,7 @@ export function GroceryPage({
     activeHousehold,
     switchHousehold,
     createHousehold,
+    syncHouseholdToCloud,
     joinHouseholdByCode,
     deleteHousehold,
     members,
@@ -453,6 +454,7 @@ export function GroceryPage({
         currentUserId={user?.id}
         onSwitchHousehold={switchHousehold}
         onCreateHousehold={createHousehold}
+        onSyncToCloud={syncHouseholdToCloud}
         onJoinHousehold={joinHouseholdByCode}
         onDeleteHousehold={deleteHousehold}
       />
