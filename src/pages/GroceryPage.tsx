@@ -118,16 +118,16 @@ export function GroceryPage({
   };
 
   return (
-    <div className="space-y-4 md:space-y-6 pb-20 md:pb-8">
+    <div className="w-full max-w-full min-w-0 space-y-4 md:space-y-6 pb-6 box-border">
       {/* Top Header Card */}
-      <div className="px-4 md:px-0 pt-2 flex items-center justify-between gap-3 card-enter">
+      <div className="w-full max-w-full min-w-0 px-4 md:px-0 pt-2 flex items-center justify-between gap-2.5 box-border card-enter">
         <div className="min-w-0 flex-1">
           <p className="text-[11px] text-muted-foreground font-semibold tracking-wide uppercase">
             Hostel & Flat Living
           </p>
-          <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tight flex items-center gap-2">
+          <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tight flex items-center gap-1.5 truncate">
             <span>Grocery & Pantry</span>
-            <span className="text-xl">🛒</span>
+            <span className="text-lg sm:text-xl">🛒</span>
           </h1>
         </div>
 
@@ -135,7 +135,7 @@ export function GroceryPage({
         <button
           type="button"
           onClick={() => setHouseholdDialogOpen(true)}
-          className="h-10 px-3.5 rounded-2xl bg-card border border-border/70 card-shadow flex items-center gap-2 hover:border-primary/50 transition-all tap-shrink"
+          className="h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-2xl bg-card border border-border/70 card-shadow flex items-center gap-1.5 shrink-0 hover:border-primary/50 transition-all tap-shrink"
         >
           <Building className="w-4 h-4 text-primary shrink-0" />
           <div className="text-left hidden sm:block">
@@ -146,15 +146,15 @@ export function GroceryPage({
               {activeHousehold ? activeHousehold.name : 'Solo / Flat'}
             </p>
           </div>
-          <span className="sm:hidden text-xs font-bold text-foreground">
+          <span className="sm:hidden text-xs font-bold text-foreground truncate max-w-[80px]">
             {activeHousehold ? activeHousehold.name : 'Flat'}
           </span>
         </button>
       </div>
 
       {/* Main Section Navigation Pills */}
-      <div className="px-4 md:px-0">
-        <div className="flex gap-1.5 p-1 rounded-2xl bg-muted/50 border border-border/40 overflow-x-auto scrollbar-hide">
+      <div className="w-full max-w-full min-w-0 px-4 md:px-0 box-border">
+        <div className="w-full max-w-full flex gap-1 p-1 rounded-2xl bg-muted/50 border border-border/40 overflow-x-auto scrollbar-hide box-border">
           {(
             [
               { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -183,13 +183,13 @@ export function GroceryPage({
                 type="button"
                 onClick={() => setActiveTab(tab.id as GroceryTab)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-150 tap-shrink flex-1 justify-center',
+                  'shrink-0 sm:flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-150 tap-shrink',
                   active
                     ? 'bg-card text-foreground shadow-xs font-black'
                     : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                 )}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-3.5 h-3.5 shrink-0" />
                 <span>{tab.label}</span>
                 {tab.badge !== undefined && tab.badge > 0 && (
                   <span
@@ -212,7 +212,7 @@ export function GroceryPage({
       </div>
 
       {/* Content Body */}
-      <div className="px-4 md:px-0">
+      <div className="w-full max-w-full min-w-0 px-4 md:px-0 box-border">
         {/* TAB 1: OVERVIEW */}
         {activeTab === 'overview' && (
           <GroceryDashboard

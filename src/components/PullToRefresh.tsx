@@ -58,7 +58,7 @@ export function PullToRefresh({ onRefresh, children, className }: PullToRefreshP
       onTouchMove={onTouchMove}
       onTouchEnd={finish}
       onTouchCancel={finish}
-      className={cn('relative flex-1 overflow-y-auto overscroll-y-contain scrollbar-hide', className)}
+      className={cn('relative flex-1 w-full min-w-0 max-w-full overflow-y-auto overflow-x-hidden overscroll-y-contain scrollbar-hide', className)}
     >
       {/* Indicator */}
       <div
@@ -78,6 +78,7 @@ export function PullToRefresh({ onRefresh, children, className }: PullToRefreshP
       </div>
 
       <div
+        className="w-full min-w-0 max-w-full"
         style={{
           transform: `translateY(${distance}px)`,
           transition: pulling.current ? 'none' : 'transform 0.3s cubic-bezier(0.22,1,0.36,1)',

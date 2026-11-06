@@ -193,7 +193,7 @@ const Index = () => {
   return (
     <AppLockGate>
       {showOnboarding && <Onboarding onDone={() => setShowOnboarding(false)} />}
-      <div className="min-h-screen h-screen bg-background gradient-mesh-bg flex overflow-x-hidden max-w-[100vw]">
+      <div className="min-h-screen h-screen bg-background gradient-mesh-bg flex w-full max-w-full overflow-hidden">
         <AppSidebar
           activeTab={activeTab}
           onTabChange={handleTabChange}
@@ -207,17 +207,17 @@ const Index = () => {
           expenses={expenses}
           currency={settings.currency}
         />
-        <div className="flex-1 flex justify-center min-h-0">
-          <div className="w-full max-w-2xl flex flex-col relative min-h-0">
-            <PullToRefresh onRefresh={handleRefresh} className="pb-24 md:pb-8 pt-safe-top">
-              <div className={`md:px-4 transition-opacity duration-200 ${isPending ? 'opacity-60' : 'opacity-100'}`}>
+        <main className="flex-1 flex justify-center w-full min-w-0 max-w-full min-h-0 overflow-hidden">
+          <div className="w-full max-w-2xl flex flex-col relative min-w-0 max-w-full min-h-0">
+            <PullToRefresh onRefresh={handleRefresh} className="pt-safe-top w-full min-w-0 max-w-full">
+              <div className={`w-full min-w-0 max-w-full pb-36 md:pb-12 md:px-4 transition-opacity duration-200 ${isPending ? 'opacity-60' : 'opacity-100'}`}>
                 {renderPage()}
               </div>
             </PullToRefresh>
 
             <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
           </div>
-        </div>
+        </main>
       </div>
     </AppLockGate>
   );

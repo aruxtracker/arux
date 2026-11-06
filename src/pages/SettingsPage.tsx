@@ -75,11 +75,11 @@ const SHARE_TEXT = 'I am using ARUX to track my income, expenses, tasks and habi
 /** WhatsApp style grouped list container. */
 function Group({ children, label, delay = 0 }: { children: React.ReactNode; label?: string; delay?: number }) {
   return (
-    <div className="card-enter" style={{ animationDelay: `${delay}ms` }}>
+    <div className="card-enter w-full min-w-0 box-border" style={{ animationDelay: `${delay}ms` }}>
       {label && (
-        <p className="px-6 md:px-1 pb-1.5 text-[11px] font-bold text-primary uppercase tracking-[0.14em]">{label}</p>
+        <p className="px-2 pb-1.5 text-[11px] font-bold text-primary uppercase tracking-[0.14em] truncate">{label}</p>
       )}
-      <div className="mx-4 md:mx-0 rounded-[22px] bg-card border border-border/60 card-shadow overflow-hidden divide-y divide-border/50">
+      <div className="w-full rounded-[22px] bg-card border border-border/60 card-shadow overflow-hidden divide-y divide-border/50 box-border">
         {children}
       </div>
     </div>
@@ -97,41 +97,45 @@ function Row({
     <Wrapper
       onClick={onClick}
       className={cn(
-        'w-full flex items-center gap-3.5 px-4 py-3 text-left min-h-[56px]',
+        'w-full flex items-center justify-between gap-3 px-3.5 sm:px-4 py-3 text-left min-h-[56px] box-border',
         onClick && 'active:bg-muted/60 transition-colors'
       )}
     >
-      <span
-        className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-        style={{
-          background: `hsl(${danger ? 'var(--destructive)' : tint || 'var(--primary)'} / 0.14)`,
-          color: `hsl(${danger ? 'var(--destructive)' : tint || 'var(--primary)'})`,
-        }}
-      >
-        <Icon className="w-[18px] h-[18px]" strokeWidth={1.9} />
-      </span>
-      <span className="flex-1 min-w-0">
-        <span className={cn('block text-[15px] font-semibold truncate', danger ? 'text-destructive' : 'text-foreground')}>
-          {title}
+      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+        <span
+          className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+          style={{
+            background: `hsl(${danger ? 'var(--destructive)' : tint || 'var(--primary)'} / 0.14)`,
+            color: `hsl(${danger ? 'var(--destructive)' : tint || 'var(--primary)'})`,
+          }}
+        >
+          <Icon className="w-[18px] h-[18px]" strokeWidth={1.9} />
         </span>
-        {subtitle && <span className="block text-xs text-muted-foreground truncate mt-0.5">{subtitle}</span>}
-      </span>
-      {right !== undefined ? right : onClick ? <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" /> : null}
+        <div className="flex-1 min-w-0">
+          <span className={cn('block text-[15px] font-semibold truncate', danger ? 'text-destructive' : 'text-foreground')}>
+            {title}
+          </span>
+          {subtitle && <span className="block text-xs text-muted-foreground truncate mt-0.5">{subtitle}</span>}
+        </div>
+      </div>
+      <div className="shrink-0 flex items-center pl-1">
+        {right !== undefined ? right : onClick ? <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" /> : null}
+      </div>
     </Wrapper>
   );
 }
 
 function SubHeader({ title, onBack }: { title: string; onBack: () => void }) {
   return (
-    <div className="px-4 md:px-0 pt-2 flex items-center gap-2">
+    <div className="pt-2 flex items-center gap-2 w-full min-w-0 box-border">
       <button
         onClick={onBack}
         aria-label="Back"
-        className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-foreground tap-shrink active:bg-muted"
+        className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-foreground tap-shrink active:bg-muted shrink-0"
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
-      <h1 className="text-xl font-bold text-foreground">{title}</h1>
+      <h1 className="text-xl font-bold text-foreground truncate">{title}</h1>
     </div>
   );
 }
@@ -359,11 +363,11 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
     ];
 
     return (
-      <div className="flex flex-col gap-4 pb-2 w-full min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col gap-4 pb-6 w-full min-w-0 max-w-full px-4 md:px-0 box-border">
         <SubHeader title="Profile" onBack={back} />
 
         {/* Avatar + name */}
-        <div className="mx-4 md:mx-0 rounded-[26px] bg-card border border-border/60 card-shadow p-6 flex flex-col items-center card-enter">
+        <div className="w-full rounded-[26px] bg-card border border-border/60 card-shadow p-6 flex flex-col items-center card-enter box-border">
           <div className={cn(
             'w-24 h-24 rounded-full flex items-center justify-center shadow-pop bg-gradient-to-br',
             avatar ? avatar.ring : 'from-primary to-accent'
@@ -377,7 +381,7 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
         </div>
 
         {/* Preset avatars */}
-        <div className="mx-4 md:mx-0 rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter" style={{ animationDelay: '60ms' }}>
+        <div className="w-full rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter box-border" style={{ animationDelay: '60ms' }}>
           <Label className="text-sm font-semibold block">Choose your avatar</Label>
           <p className="text-[11px] text-muted-foreground mt-0.5 mb-3">Pick one of the built in illustrations. No photo upload needed.</p>
           <div className="grid grid-cols-4 gap-2.5">
@@ -404,7 +408,7 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
         </div>
 
         {/* Display name */}
-        <div className="mx-4 md:mx-0 rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter" style={{ animationDelay: '100ms' }}>
+        <div className="w-full rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter box-border" style={{ animationDelay: '100ms' }}>
           <Label htmlFor="dn" className="text-sm font-semibold block mb-2">Display name</Label>
           <div className="flex gap-2">
             <Input
@@ -419,7 +423,7 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
         </div>
 
         {/* Gender */}
-        <div className="mx-4 md:mx-0 rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter" style={{ animationDelay: '140ms' }}>
+        <div className="w-full rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter box-border" style={{ animationDelay: '140ms' }}>
           <Label className="text-sm font-semibold block">Gender</Label>
           <p className="text-[11px] text-muted-foreground mt-0.5 mb-3">Used to personalise your profile.</p>
           <div className="grid grid-cols-3 gap-2">
@@ -481,9 +485,9 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
 
   if (screen === 'features') {
     return (
-      <div className="flex flex-col gap-4 pb-2 w-full min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col gap-4 pb-6 w-full min-w-0 max-w-full px-4 md:px-0 box-border">
         <SubHeader title="All features" onBack={back} />
-        <div className="mx-4 md:mx-0 rounded-[26px] bg-card border border-border/60 card-shadow p-3 card-enter">
+        <div className="w-full rounded-[26px] bg-card border border-border/60 card-shadow p-3 card-enter box-border">
           <div className="grid grid-cols-4 gap-1">
             {ALL_FEATURES.map(({ id, label, icon: Icon, tint }) => (
               <button
@@ -506,11 +510,11 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
 
   if (screen === 'whatsnew') {
     return (
-      <div className="flex flex-col gap-4 pb-2 w-full min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col gap-4 pb-6 w-full min-w-0 max-w-full px-4 md:px-0 box-border">
         <SubHeader title="What's new" onBack={back} />
         {CHANGELOG.map((rel, idx) => (
           <div key={rel.version}
-            className="mx-4 md:mx-0 rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter"
+            className="w-full rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter box-border"
             style={{ animationDelay: `${idx * 60}ms` }}>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-1 rounded-full bg-primary/12 text-primary text-xs font-bold">v{rel.version}</span>
@@ -542,11 +546,11 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
     const badge = { building: 'In progress', planned: 'Planned', idea: 'Idea' } as const;
     const tint = { building: 'var(--income)', planned: 'var(--brand-blue)', idea: 'var(--brand-yellow)' } as const;
     return (
-      <div className="flex flex-col gap-4 pb-2 w-full min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col gap-4 pb-6 w-full min-w-0 max-w-full px-4 md:px-0 box-border">
         <SubHeader title="Coming soon" onBack={back} />
         {ROADMAP.map((item, idx) => (
           <div key={item.title}
-            className="mx-4 md:mx-0 rounded-[22px] bg-card border border-border/60 card-shadow p-4 flex gap-3.5 card-enter"
+            className="w-full rounded-[22px] bg-card border border-border/60 card-shadow p-4 flex gap-3.5 card-enter box-border"
             style={{ animationDelay: `${idx * 50}ms` }}>
             <span className="w-11 h-11 rounded-2xl bg-muted/60 flex items-center justify-center text-xl shrink-0">{item.emoji}</span>
             <div className="min-w-0 flex-1">
@@ -568,9 +572,9 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
 
   if (screen === 'appearance') {
     return (
-      <div className="flex flex-col gap-4 pb-2 w-full min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col gap-4 pb-6 w-full min-w-0 max-w-full px-4 md:px-0 box-border">
         <SubHeader title="Appearance" onBack={back} />
-        <div className="mx-4 md:mx-0 rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter">
+        <div className="w-full rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter box-border">
           <Label className="text-sm font-semibold mb-2.5 block">Color theme</Label>
           <div className="grid grid-cols-3 gap-2.5">
             {THEMES.map(t => {
@@ -617,7 +621,7 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
 
   if (screen === 'notifications') {
     return (
-      <div className="flex flex-col gap-4 pb-2 w-full min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col gap-4 pb-6 w-full min-w-0 max-w-full px-4 md:px-0 box-border">
         <SubHeader title="Notifications" onBack={back} />
         <Group delay={40}>
           <NotificationCenter
@@ -668,7 +672,7 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
 
   if (screen === 'security') {
     return (
-      <div className="flex flex-col gap-4 pb-2 w-full min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col gap-4 pb-6 w-full min-w-0 max-w-full px-4 md:px-0 box-border">
         <SubHeader title="Privacy and security" onBack={back} />
         <Group delay={40}>
           <Row
@@ -687,7 +691,7 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
             </>
           )}
         </Group>
-        <p className="px-6 md:px-1 text-[11px] text-muted-foreground">
+        <p className="px-2 text-[11px] text-muted-foreground">
           Your PIN is stored only on this device. If you forget it, sign out and sign in again in a fresh browser profile.
         </p>
         {pinDialogNode()}
@@ -697,9 +701,9 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
 
   if (screen === 'sharing') {
     return (
-      <div className="flex flex-col gap-4 pb-2 w-full min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col gap-4 pb-6 w-full min-w-0 max-w-full px-4 md:px-0 box-border">
         <SubHeader title="Invite a friend" onBack={back} />
-        <div className="mx-4 md:mx-0 rounded-[22px] bg-card border border-border/60 card-shadow p-4 flex flex-col gap-3 card-enter">
+        <div className="w-full rounded-[22px] bg-card border border-border/60 card-shadow p-4 flex flex-col gap-3 card-enter box-border">
           <p className="text-sm text-foreground">
             Share ARUX via WhatsApp, Messages or copy the link.
           </p>
@@ -719,9 +723,9 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
 
   if (screen === 'data') {
     return (
-      <div className="flex flex-col gap-4 pb-2 w-full min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col gap-4 pb-6 w-full min-w-0 max-w-full px-4 md:px-0 box-border">
         <SubHeader title="Data and storage" onBack={back} />
-        <div className="mx-4 md:mx-0 rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter">
+        <div className="w-full rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter box-border">
           <div className="grid grid-cols-3 divide-x divide-border/50">
             <div className="flex flex-col items-center gap-0.5">
               <p className="text-2xl font-bold income-text tabular-nums">{stats.incomes}</p>
@@ -746,12 +750,12 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
 
   if (screen === 'tutorial') {
     return (
-      <div className="flex flex-col gap-4 pb-2 w-full min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col gap-4 pb-6 w-full min-w-0 max-w-full px-4 md:px-0 box-border">
         <SubHeader title="How to use ARUX" onBack={back} />
         {TUTORIALS.map((t, idx) => (
           <div
             key={t.title}
-            className="mx-4 md:mx-0 rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter"
+            className="w-full rounded-[22px] bg-card border border-border/60 card-shadow p-4 card-enter box-border"
             style={{ animationDelay: `${idx * 60}ms` }}
           >
             <div className="flex items-center gap-3">
