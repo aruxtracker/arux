@@ -8,9 +8,9 @@ import {
   GROCERY_CATEGORIES,
   GROCERY_UNITS,
   GroceryUnit,
-  GroceryCategory,
 } from '@/types/grocery';
-import { Plus, Sparkles, Tag, Layers } from 'lucide-react';
+import { Plus, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface GroceryItemDialogProps {
   open: boolean;
@@ -31,18 +31,19 @@ interface GroceryItemDialogProps {
 
 const FREQUENT_GROCERIES = [
   { name: 'Rice', category: 'Rice & Grains', unit: 'kg' as GroceryUnit, defaultQty: 5 },
-  { name: 'Atta / Wheat', category: 'Rice & Grains', unit: 'kg' as GroceryUnit, defaultQty: 5 },
+  { name: 'Atta', category: 'Rice & Grains', unit: 'kg' as GroceryUnit, defaultQty: 5 },
   { name: 'Toor Dal', category: 'Pulses & Dal', unit: 'kg' as GroceryUnit, defaultQty: 1 },
   { name: 'Onion', category: 'Vegetables', unit: 'kg' as GroceryUnit, defaultQty: 2 },
   { name: 'Potato', category: 'Vegetables', unit: 'kg' as GroceryUnit, defaultQty: 2 },
   { name: 'Tomato', category: 'Vegetables', unit: 'kg' as GroceryUnit, defaultQty: 1 },
   { name: 'Milk', category: 'Dairy Products', unit: 'litre' as GroceryUnit, defaultQty: 1 },
   { name: 'Eggs', category: 'Dairy Products', unit: 'dozen' as GroceryUnit, defaultQty: 1 },
-  { name: 'Cooking Oil', category: 'Cooking Essentials', unit: 'litre' as GroceryUnit, defaultQty: 1 },
+  { name: 'Oil', category: 'Cooking Essentials', unit: 'litre' as GroceryUnit, defaultQty: 1 },
   { name: 'Chicken', category: 'Chicken & Meat', unit: 'kg' as GroceryUnit, defaultQty: 1 },
   { name: 'Salt', category: 'Spices & Masala', unit: 'packet' as GroceryUnit, defaultQty: 1 },
-  { name: 'Maggi / Noodles', category: 'Snacks', unit: 'packet' as GroceryUnit, defaultQty: 4 },
-  { name: 'Tea Powder', category: 'Cooking Essentials', unit: 'packet' as GroceryUnit, defaultQty: 1 },
+  { name: 'Tea', category: 'Cooking Essentials', unit: 'packet' as GroceryUnit, defaultQty: 1 },
+  { name: 'Maggi', category: 'Snacks', unit: 'packet' as GroceryUnit, defaultQty: 4 },
+  { name: 'Soap', category: 'Personal Care', unit: 'pieces' as GroceryUnit, defaultQty: 2 },
 ];
 
 export function GroceryItemDialog({
@@ -54,11 +55,12 @@ export function GroceryItemDialog({
   onSave,
 }: GroceryItemDialogProps) {
   const [itemName, setItemName] = useState('');
-  const [category, setCategory] = useState<string>('Rice & Grains');
+  const [category, setCategory] = useState<string>('Vegetables');
   const [quantity, setQuantity] = useState<string>('1');
   const [unit, setUnit] = useState<GroceryUnit>('kg');
   const [estimatedPrice, setEstimatedPrice] = useState<string>('');
   const [notes, setNotes] = useState('');
+  const [showExtras, setShowExtras] = useState(false);
 
   useEffect(() => {
     if (item) {
@@ -68,13 +70,15 @@ export function GroceryItemDialog({
       setUnit(item.unit);
       setEstimatedPrice(item.estimated_price ? String(item.estimated_price) : '');
       setNotes(item.notes || '');
+      setShowExtras(!!(item.estimated_price || item.notes));
     } else {
       setItemName('');
-      setCategory('Rice & Grains');
+      setCategory('Vegetables');
       setQuantity('1');
       setUnit('kg');
       setEstimatedPrice('');
       setNotes('');
+      setShowExtras(false);
     }
   }, [item, open]);
 
@@ -102,44 +106,53 @@ export function GroceryItemDialog({
     onOpenChange(false);
   };
 
+  const selectedCategoryData = GROCERY_CATEGORIES.find((c) => c.name === category);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-3xl p-5 md:p-6 bg-card border-border/80 max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="text-left">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-2">
-            <Plus className="w-6 h-6" />
-          </div>
-          <DialogTitle className="text-xl font-extrabold text-foreground tracking-tight">
-            {item ? 'Edit Grocery Item' : 'Add Grocery Item'}
-          </DialogTitle>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Add items to your shared hostel / flat shopping checklist.
-          </p>
-        </DialogHeader>
+      <DialogContent className="max-w-sm w-[calc(100vw-24px)] mx-auto rounded-3xl p-0 bg-card border-border/80 max-h-[92vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="px-5 pt-5 pb-3 shrink-0">
+          <DialogHeader className="text-left space-y-0">
+            <DialogTitle className="text-lg font-extrabold text-foreground tracking-tight">
+              {item ? '✏️ Edit Item' : '+ Add Grocery'}
+            </DialogTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {item ? 'Update the item details below.' : 'Add to your shared shopping checklist.'}
+            </p>
+          </DialogHeader>
+        </div>
 
-        {/* Quick Add presets (only when adding new) */}
-        {!item && (
-          <div className="pt-1">
-            <div className="flex items-center gap-1.5 mb-2 text-xs font-semibold text-muted-foreground">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              <span>Quick pick common items</span>
-            </div>
-            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-              {FREQUENT_GROCERIES.slice(0, 8).map((preset) => (
-                <button
-                  key={preset.name}
-                  type="button"
-                  onClick={() => handleQuickAdd(preset)}
-                  className="px-2.5 py-1 rounded-xl text-xs font-medium bg-muted/60 hover:bg-muted text-foreground border border-border/50 shrink-0 tap-shrink transition-colors"
-                >
-                  {preset.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-5 pb-2 space-y-4">
 
-        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          {/* Quick pick (only on add) */}
+          {!item && (
+            <div>
+              <div className="flex items-center gap-1.5 mb-2 text-[11px] font-semibold text-muted-foreground">
+                <Sparkles className="w-3 h-3 text-primary" />
+                <span>Quick pick</span>
+              </div>
+              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide -mx-0.5 px-0.5">
+                {FREQUENT_GROCERIES.map((preset) => (
+                  <button
+                    key={preset.name}
+                    type="button"
+                    onClick={() => handleQuickAdd(preset)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-full text-xs font-medium border shrink-0 tap-shrink transition-all',
+                      itemName === preset.name
+                        ? 'bg-primary text-primary-foreground border-primary font-bold'
+                        : 'bg-muted/50 hover:bg-muted text-foreground border-border/50'
+                    )}
+                  >
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Item Name */}
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold text-muted-foreground">Item Name *</Label>
@@ -147,32 +160,41 @@ export function GroceryItemDialog({
               required
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
-              placeholder="e.g. Basmati Rice, Onion, Eggs"
-              className="h-11 rounded-xl bg-muted/40 font-semibold"
-              autoFocus
+              placeholder="e.g. Basmati Rice, Onion, Eggs…"
+              className="h-11 rounded-xl bg-muted/40 font-semibold text-sm"
+              autoFocus={!item}
             />
           </div>
 
-          {/* Category */}
+          {/* Category pills */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-              <Tag className="w-3 h-3" />
-              <span>Category</span>
-            </Label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full h-11 px-3 rounded-xl bg-muted/40 border border-input text-foreground text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              {GROCERY_CATEGORIES.map((cat) => (
-                <option key={cat.name} value={cat.name}>
-                  {cat.emoji} {cat.name}
-                </option>
-              ))}
-            </select>
+            <Label className="text-xs font-semibold text-muted-foreground">Category</Label>
+            <div className="grid grid-cols-3 gap-1.5">
+              {GROCERY_CATEGORIES.map((cat) => {
+                const isSelected = category === cat.name;
+                return (
+                  <button
+                    key={cat.name}
+                    type="button"
+                    onClick={() => setCategory(cat.name)}
+                    className={cn(
+                      'flex flex-col items-center justify-center gap-0.5 py-2 px-1 rounded-xl text-center border transition-all tap-shrink',
+                      isSelected
+                        ? 'bg-primary/10 border-primary text-primary font-bold'
+                        : 'bg-muted/40 border-border/40 text-muted-foreground hover:bg-muted hover:text-foreground'
+                    )}
+                  >
+                    <span className="text-base leading-none">{cat.emoji}</span>
+                    <span className="text-[9px] font-semibold leading-tight line-clamp-2 text-center">
+                      {cat.name.replace(' & ', ' &\n')}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Quantity & Unit */}
+          {/* Quantity + Unit */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold text-muted-foreground">Quantity *</Label>
@@ -183,79 +205,101 @@ export function GroceryItemDialog({
                 required
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                className="h-11 rounded-xl bg-muted/40 font-bold"
+                className="h-11 rounded-xl bg-muted/40 font-bold text-center text-base"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
-                <Layers className="w-3 h-3" />
-                <span>Unit</span>
-              </Label>
-              <select
-                value={unit}
-                onChange={(e) => setUnit(e.target.value as GroceryUnit)}
-                className="w-full h-11 px-3 rounded-xl bg-muted/40 border border-input text-foreground text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary"
-              >
+              <Label className="text-xs font-semibold text-muted-foreground">Unit</Label>
+              <div className="flex flex-wrap gap-1 pt-1">
                 {GROCERY_UNITS.map((u) => (
-                  <option key={u} value={u}>
+                  <button
+                    key={u}
+                    type="button"
+                    onClick={() => setUnit(u)}
+                    className={cn(
+                      'px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all tap-shrink',
+                      unit === u
+                        ? 'bg-primary text-primary-foreground border-primary font-bold'
+                        : 'bg-muted/40 border-border/40 text-muted-foreground hover:bg-muted'
+                    )}
+                  >
                     {u}
-                  </option>
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
           </div>
 
-          {/* Estimated Price */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground">
-              Estimated Price ({currency})
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">
-                {currency}
-              </span>
-              <Input
-                type="number"
-                step="any"
-                min="0"
-                value={estimatedPrice}
-                onChange={(e) => setEstimatedPrice(e.target.value)}
-                placeholder="Optional budget estimate"
-                className="pl-8 h-11 rounded-xl bg-muted/40 font-semibold"
-              />
+          {/* Optional fields toggle */}
+          <button
+            type="button"
+            onClick={() => setShowExtras((v) => !v)}
+            className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors tap-shrink"
+          >
+            {showExtras ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            <span>{showExtras ? 'Hide' : 'Add'} price & notes (optional)</span>
+          </button>
+
+          {showExtras && (
+            <div className="space-y-3 pb-1">
+              {/* Estimated Price */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground">
+                  Estimated Price ({currency}) — optional
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">
+                    {currency}
+                  </span>
+                  <Input
+                    type="number"
+                    step="any"
+                    min="0"
+                    value={estimatedPrice}
+                    onChange={(e) => setEstimatedPrice(e.target.value)}
+                    placeholder="0"
+                    className="pl-8 h-11 rounded-xl bg-muted/40 font-semibold"
+                  />
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground">Notes / Brand — optional</Label>
+                <Input
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="e.g. Daawat Rozana, check expiry"
+                  className="h-11 rounded-xl bg-muted/40 text-xs"
+                />
+              </div>
             </div>
-          </div>
+          )}
+        </div>
 
-          {/* Notes */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground">Notes / Brand</Label>
-            <Input
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Daawat Rozana, check expiry date"
-              className="h-11 rounded-xl bg-muted/40 text-xs"
-            />
-          </div>
-
-          <DialogFooter className="pt-2 flex flex-col sm:flex-row gap-2">
+        {/* Footer */}
+        <div className="px-5 pt-2 pb-5 shrink-0 border-t border-border/40">
+          <div className="flex gap-2 pt-3">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="w-full sm:w-auto h-11 rounded-xl text-xs"
+              className="h-11 rounded-xl text-xs px-4"
             >
               Cancel
             </Button>
             <Button
-              type="submit"
-              className="w-full sm:flex-1 h-11 rounded-xl gradient-primary text-xs font-bold gap-1.5 shadow-pop tap-shrink"
+              type="button"
+              onClick={handleSubmit}
+              disabled={!itemName.trim() || !quantity}
+              className="flex-1 h-11 rounded-xl gradient-primary text-sm font-bold gap-1.5 shadow-pop tap-shrink"
             >
-              {item ? 'Save Changes' : 'Add to List'}
+              <Plus className="w-4 h-4" />
+              {item ? 'Save Changes' : `Add ${selectedCategoryData?.emoji || ''} Item`}
             </Button>
-          </DialogFooter>
-        </form>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
-

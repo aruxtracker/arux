@@ -55,6 +55,7 @@ export function GroceryPage({
     switchHousehold,
     createHousehold,
     joinHouseholdByCode,
+    deleteHousehold,
     members,
     lists,
     createList,
@@ -449,9 +450,11 @@ export function GroceryPage({
         households={households}
         activeHousehold={activeHousehold}
         members={members}
+        currentUserId={user?.id}
         onSwitchHousehold={switchHousehold}
         onCreateHousehold={createHousehold}
         onJoinHousehold={joinHouseholdByCode}
+        onDeleteHousehold={deleteHousehold}
       />
 
       {/* 6. Create New Shopping List Modal */}

@@ -776,36 +776,94 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
     } catch {}
   };
 
-  const joinHouseholdByCode = async (code: string) => {
-    if (!user) return;
+  const joinHouseholdByCode = async (code: string): Promise<boolean> => {
+    if (!user) {
+      toast.error('You must be logged in to join a household');
+      return false;
+    }
     const cleanCode = code.trim().toUpperCase();
+    if (!cleanCode || cleanCode.length < 4) {
+      toast.error('Please enter a valid invite code');
+      return false;
+    }
 
+    // 1. First try local households (for offline / already-known households)
+    const localMatch = households.find((h) => h.code?.toUpperCase() === cleanCode);
+    if (localMatch) {
+      if (activeHouseholdId === localMatch.id) {
+        toast.info(`You are already in "${localMatch.name}"`);
+        return false;
+      }
+      switchHousehold(localMatch.id);
+      toast.success(`Joined household "${localMatch.name}"!`);
+      return true;
+    }
+
+    // 2. Try Supabase lookup
     try {
       const { data: hData, error: hErr } = await supabase
         .from('grocery_households' as any)
         .select('*')
-        .eq('code', cleanCode)
-        .single();
+        .ilike('code', cleanCode)
+        .maybeSingle();
 
-      if (hErr || !hData) {
-        toast.error('Household not found with this invite code');
+      if (hErr) {
+        // If table doesn't exist yet, suggest running migration
+        if (hErr.code === '42P01') {
+          toast.error('Grocery tables not set up yet. Please ask admin to run the DB migration.');
+        } else {
+          toast.error(`Could not search households: ${hErr.message}`);
+        }
         return false;
       }
 
-      await supabase.from('grocery_household_members' as any).upsert({
-        household_id: hData.id,
-        user_id: user.id,
-        role: 'member',
-      });
+      if (!hData) {
+        toast.error(`No household found with code "${cleanCode}". Check the code and try again.`);
+        return false;
+      }
 
-      setHouseholds((prev) => (prev.some((h) => h.id === hData.id) ? prev : [hData, ...prev]));
+      // Already a member?
+      if (households.some((h) => h.id === hData.id)) {
+        switchHousehold(hData.id);
+        toast.info(`Switched to "${hData.name}"`);
+        return true;
+      }
+
+      // Join as member
+      const { error: joinErr } = await supabase.from('grocery_household_members' as any).upsert(
+        { household_id: hData.id, user_id: user.id, role: 'member' },
+        { onConflict: 'household_id,user_id' }
+      );
+
+      if (joinErr) {
+        toast.error('Could not join household. Try again.');
+        return false;
+      }
+
+      setHouseholds((prev) => (prev.some((h) => h.id === hData.id) ? prev : [hData as GroceryHousehold, ...prev]));
       switchHousehold(hData.id);
-      toast.success(`Joined household "${hData.name}"!`);
+      toast.success(`Joined household "${hData.name}"! 🎉`);
       return true;
-    } catch {
-      toast.error('Could not join household');
+    } catch (err) {
+      toast.error('Network error. Please check your connection and try again.');
       return false;
     }
+  };
+
+  const deleteHousehold = async (id: string) => {
+    if (!user) return;
+    const h = households.find((hh) => hh.id === id);
+    if (!h) return;
+
+    // Remove from local state immediately
+    setHouseholds((prev) => prev.filter((hh) => hh.id !== id));
+    if (activeHouseholdId === id) switchHousehold(null);
+    toast.success(`Deleted household "${h.name}"`);
+
+    try {
+      await supabase.from('grocery_household_members' as any).delete().eq('household_id', id);
+      await supabase.from('grocery_households' as any).delete().eq('id', id).eq('owner_id', user.id);
+    } catch {}
   };
 
   // Derived calculations for Dashboard
@@ -833,6 +891,7 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
     switchHousehold,
     createHousehold,
     joinHouseholdByCode,
+    deleteHousehold,
     members,
     lists,
     createList,
