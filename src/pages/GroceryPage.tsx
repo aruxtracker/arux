@@ -54,8 +54,8 @@ export function GroceryPage({
     activeHousehold,
     switchHousehold,
     createHousehold,
-    syncHouseholdToCloud,
-    joinHouseholdByCode,
+    inviteMemberByEmail,
+    removeHouseholdMember,
     deleteHousehold,
     members,
     lists,
@@ -312,7 +312,7 @@ export function GroceryPage({
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {activeHousehold
-                      ? `Invite Code: ${activeHousehold.code}`
+                      ? `${members.length || 1} roommate${(members.length || 1) === 1 ? '' : 's'} sharing groceries`
                       : 'Not connected to a shared flat group.'}
                   </p>
                 </div>
@@ -330,8 +330,8 @@ export function GroceryPage({
                     Roommate Permissions
                   </p>
                   <p className="text-xs text-foreground leading-relaxed">
-                    All roommates with the invite code can check off groceries, update stock levels,
-                    and record daily cooking consumption.
+                    All invited roommates can check off groceries, update stock levels,
+                    and record daily cooking consumption together in real-time.
                   </p>
                 </div>
               )}
@@ -452,10 +452,11 @@ export function GroceryPage({
         activeHousehold={activeHousehold}
         members={members}
         currentUserId={user?.id}
+        currentUserEmail={user?.email}
         onSwitchHousehold={switchHousehold}
         onCreateHousehold={createHousehold}
-        onSyncToCloud={syncHouseholdToCloud}
-        onJoinHousehold={joinHouseholdByCode}
+        onInviteByEmail={inviteMemberByEmail}
+        onRemoveMember={removeHouseholdMember}
         onDeleteHousehold={deleteHousehold}
       />
 

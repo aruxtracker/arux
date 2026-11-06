@@ -102,11 +102,30 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
 
       // 2. Household members if active
       if (activeHouseholdId) {
-        const { data: mData } = await supabase
-          .from('grocery_household_members' as any)
-          .select('*')
-          .eq('household_id', activeHouseholdId);
-        if (mData) setMembers(mData);
+        // Try getting member info with email & name
+        const { data: rpcMembers, error: rpcErr } = await supabase.rpc(
+          'get_grocery_household_members' as any,
+          { _household_id: activeHouseholdId }
+        );
+        if (!rpcErr && Array.isArray(rpcMembers) && rpcMembers.length > 0) {
+          setMembers(
+            rpcMembers.map((m: any) => ({
+              id: m.id,
+              household_id: m.household_id,
+              user_id: m.user_id,
+              role: m.role,
+              joined_at: m.joined_at,
+              email: m.email,
+              displayName: m.display_name,
+            }))
+          );
+        } else {
+          const { data: mData } = await supabase
+            .from('grocery_household_members' as any)
+            .select('*')
+            .eq('household_id', activeHouseholdId);
+          if (mData) setMembers(mData);
+        }
       }
 
       // 3. Lists
@@ -800,116 +819,114 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
     setHouseholds((prev) => [newH, ...prev]);
     switchHousehold(newH.id);
 
+    // Add owner to members list
+    const ownerMember: GroceryHouseholdMember = {
+      id: generateUUID(),
+      household_id: newH.id,
+      user_id: user.id,
+      role: 'owner',
+      joined_at: new Date().toISOString(),
+      email: user.email || '',
+      displayName: userName,
+    };
+    setMembers([ownerMember]);
+
     // Sync to Supabase so friends can join
     const synced = await syncHouseholdToCloud(newH);
     if (synced) {
-      toast.success(`Household "${newH.name}" created! Share code: ${newH.code} 🎉`);
+      toast.success(`Shared flat "${newH.name}" created! You can now invite roommates by email.`);
     } else {
-      toast.warning(
-        `Household created locally. Code: ${newH.code}\n⚠️ Cloud sync failed — your friend may not be able to join yet.`,
-        { duration: 7000 }
-      );
+      toast.info(`Created "${newH.name}" locally.`);
     }
   };
 
-  const joinHouseholdByCode = async (code: string): Promise<boolean> => {
+  // INVITE MEMBER BY REGISTERED ARUX EMAIL
+  const inviteMemberByEmail = async (email: string): Promise<boolean> => {
     if (!user) {
-      toast.error('You must be logged in to join a household');
+      toast.error('You must be logged in to invite roommates');
       return false;
     }
-    const cleanCode = code.trim().toUpperCase();
-    if (!cleanCode || cleanCode.length < 4) {
-      toast.error('Please enter a valid invite code');
+    if (!activeHouseholdId || !activeHousehold) {
+      toast.error('Please select an active household first');
       return false;
     }
 
-    // 1. First try local households (for offline / already-known households)
-    const localMatch = households.find((h) => h.code?.toUpperCase() === cleanCode);
-    if (localMatch) {
-      if (activeHouseholdId === localMatch.id) {
-        toast.info(`You are already in "${localMatch.name}"`);
-        return false;
-      }
-      switchHousehold(localMatch.id);
-      toast.success(`Joined household "${localMatch.name}"!`);
-      return true;
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+      toast.error('Please enter a valid email address');
+      return false;
     }
 
-    // 2. Try RPC join first (SECURITY DEFINER - bypasses RLS lookup blocks safely)
+    if (user.email && cleanEmail === user.email.toLowerCase()) {
+      toast.error('You are already the owner of this household');
+      return false;
+    }
+
+    // Check if already in member list locally
+    if (members.some((m) => m.email?.toLowerCase() === cleanEmail)) {
+      toast.info(`${cleanEmail} is already a member of this household`);
+      return false;
+    }
+
     try {
-      const { data: rpcData, error: rpcErr } = await supabase.rpc('join_grocery_household_by_code' as any, {
-        _code: cleanCode,
+      // Call secure Supabase RPC function to find user in auth.users and add to household
+      const { data, error } = await supabase.rpc('add_grocery_household_member_by_email' as any, {
+        _household_id: activeHouseholdId,
+        _email: cleanEmail,
+        _role: 'member',
       });
 
-      if (!rpcErr && rpcData) {
-        const result = typeof rpcData === 'string' ? JSON.parse(rpcData) : rpcData;
-        if (result?.success && result?.household) {
-          const h = result.household as GroceryHousehold;
-          setHouseholds((prev) => (prev.some((item) => item.id === h.id) ? prev : [h, ...prev]));
-          switchHousehold(h.id);
-          toast.success(`Joined household "${h.name}"! 🎉`);
-          return true;
-        } else if (result?.error && !result?.success) {
-          toast.error(result.error);
-          return false;
-        }
-      }
-    } catch {
-      // RPC may not exist yet, fall through to direct lookup
-    }
-
-    // 3. Fallback: direct Supabase lookup
-    try {
-      const { data: hData, error: hErr } = await supabase
-        .from('grocery_households' as any)
-        .select('*')
-        .ilike('code', cleanCode)
-        .maybeSingle();
-
-      if (hErr) {
-        if (hErr.code === '42P01') {
+      if (error) {
+        if (error.message?.includes('function') || error.code === '42883') {
           toast.error(
-            '⚠️ Grocery database tables not found. The household owner must run the DB setup first.',
-            { duration: 7000 }
+            'Database function missing. Please run the SQL migration in Supabase SQL editor.',
+            { duration: 8000 }
           );
         } else {
-          toast.error(`Search failed: ${hErr.message}`);
+          toast.error(`Invite failed: ${error.message}`);
         }
         return false;
       }
 
-      if (!hData) {
-        toast.error(
-          `No household found with code "${cleanCode}".\n\nTips:\n• Double-check the code\n• Ask the owner to tap "Sync to Cloud" in their Household settings\n• The owner must be signed in to the same app`,
-          { duration: 8000 }
-        );
+      const result = typeof data === 'string' ? JSON.parse(data) : data;
+
+      if (!result?.success) {
+        toast.error(result?.error || 'Could not add roommate');
         return false;
       }
 
-      // Already a member?
-      if (households.some((h) => h.id === hData.id)) {
-        switchHousehold(hData.id);
-        toast.info(`Switched to "${hData.name}"`);
-        return true;
-      }
+      // Member added successfully!
+      const newMember: GroceryHouseholdMember = {
+        id: result.member_id || generateUUID(),
+        household_id: activeHouseholdId,
+        user_id: result.user_id,
+        role: 'member',
+        joined_at: new Date().toISOString(),
+        email: result.email || cleanEmail,
+        displayName: result.name || cleanEmail.split('@')[0],
+      };
 
-      // Join as member
-      const { error: joinErr } = await supabase.from('grocery_household_members' as any).upsert(
-        { household_id: hData.id, user_id: user.id, role: 'member' },
-        { onConflict: 'household_id,user_id' }
-      );
-
-      if (joinErr) {
-        toast.error('Could not join household. Try again.');
-        return false;
-      }
-
-      setHouseholds((prev) => (prev.some((h) => h.id === hData.id) ? prev : [hData as GroceryHousehold, ...prev]));
-      switchHousehold(hData.id);
-      toast.success(`Joined household "${hData.name}"! 🎉`);
+      setMembers((prev) => [...prev, newMember]);
+      logActivity('added to household', result.email || cleanEmail);
+      toast.success(`Added ${result.email || cleanEmail} to ${activeHousehold.name}! 🎉`);
       return true;
-    } catch (err) {
-      toast.error('Network error. Please check your connection and try again.');
+    } catch (err: any) {
+      toast.error(err?.message || 'Network error while adding roommate');
+      return false;
+    }
+  };
+
+  // REMOVE MEMBER FROM HOUSEHOLD
+  const removeHouseholdMember = async (memberId: string): Promise<boolean> => {
+    if (!user) return false;
+    const memberToRemove = members.find((m) => m.id === memberId);
+    setMembers((prev) => prev.filter((m) => m.id !== memberId));
+    toast.info(`Removed ${memberToRemove?.displayName || memberToRemove?.email || 'member'} from household`);
+
+    try {
+      await supabase.from('grocery_household_members' as any).delete().eq('id', memberId);
+      return true;
+    } catch {
       return false;
     }
   };
@@ -955,7 +972,8 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
     switchHousehold,
     createHousehold,
     syncHouseholdToCloud,
-    joinHouseholdByCode,
+    inviteMemberByEmail,
+    removeHouseholdMember,
     deleteHousehold,
     members,
     lists,
