@@ -483,3 +483,20 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.get_grocery_household_members(uuid) TO authenticated;
 
+-- 11. ENABLE REALTIME BROADCAST (Zero-delay push to all flatmate devices)
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.grocery_households;
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.grocery_household_members;
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.grocery_lists;
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.grocery_list_items;
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.grocery_stock;
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.grocery_stock_movements;
+  ALTER PUBLICATION supabase_realtime ADD TABLE public.grocery_activity;
+EXCEPTION WHEN OTHERS THEN
+  -- Table may already be in publication, safely ignore
+  NULL;
+END;
+$$;
+
+

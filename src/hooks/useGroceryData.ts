@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
@@ -79,10 +79,31 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
     saveCache('groceryActivity', activities);
   }, [activities]);
 
-  // Sync with Supabase
-  const fetchData = useCallback(async () => {
+  // References to prevent unnecessary re-renders during 2-second silent background sync
+  const householdsRef = useRef(households);
+  const listsRef = useRef(lists);
+  const listItemsRef = useRef(listItems);
+  const stockRef = useRef(stock);
+  const movementsRef = useRef(movements);
+  const activitiesRef = useRef(activities);
+  const membersRef = useRef(members);
+
+  useEffect(() => { householdsRef.current = households; }, [households]);
+  useEffect(() => { listsRef.current = lists; }, [lists]);
+  useEffect(() => { listItemsRef.current = listItems; }, [listItems]);
+  useEffect(() => { stockRef.current = stock; }, [stock]);
+  useEffect(() => { movementsRef.current = movements; }, [movements]);
+  useEffect(() => { activitiesRef.current = activities; }, [activities]);
+  useEffect(() => { membersRef.current = members; }, [members]);
+
+  const hasDataChanged = (fresh: any, cached: any) => {
+    return JSON.stringify(fresh) !== JSON.stringify(cached);
+  };
+
+  // Sync with Supabase (supports silent background sync that doesn't trigger UI flicker)
+  const fetchData = useCallback(async (isBackground = false) => {
     if (!user) {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
       return;
     }
 
@@ -94,7 +115,9 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
         .order('created_at', { ascending: false });
 
       if (!hErr && hData) {
-        setHouseholds(hData);
+        if (hasDataChanged(hData, householdsRef.current)) {
+          setHouseholds(hData);
+        }
         if (hData.length > 0 && !activeHouseholdId) {
           setActiveHouseholdId(hData[0].id);
         }
@@ -108,23 +131,26 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
           { _household_id: activeHouseholdId }
         );
         if (!rpcErr && Array.isArray(rpcMembers) && rpcMembers.length > 0) {
-          setMembers(
-            rpcMembers.map((m: any) => ({
-              id: m.id,
-              household_id: m.household_id,
-              user_id: m.user_id,
-              role: m.role,
-              joined_at: m.joined_at,
-              email: m.email,
-              displayName: m.display_name,
-            }))
-          );
+          const mappedMembers = rpcMembers.map((m: any) => ({
+            id: m.id,
+            household_id: m.household_id,
+            user_id: m.user_id,
+            role: m.role,
+            joined_at: m.joined_at,
+            email: m.email,
+            displayName: m.display_name,
+          }));
+          if (hasDataChanged(mappedMembers, membersRef.current)) {
+            setMembers(mappedMembers);
+          }
         } else {
           const { data: mData } = await supabase
             .from('grocery_household_members' as any)
             .select('*')
             .eq('household_id', activeHouseholdId);
-          if (mData) setMembers(mData);
+          if (mData && hasDataChanged(mData, membersRef.current)) {
+            setMembers(mData);
+          }
         }
       }
 
@@ -137,9 +163,10 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
       }
       const { data: lData } = await listQuery;
       if (lData) {
-        setLists(lData);
-      } else if (!lists.length) {
-        // Create a default initial list if none exists
+        if (hasDataChanged(lData, listsRef.current)) {
+          setLists(lData);
+        }
+      } else if (!listsRef.current.length && !isBackground) {
         const defaultList: GroceryList = {
           id: generateUUID(),
           household_id: activeHouseholdId,
@@ -160,7 +187,9 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
         itemsQuery = itemsQuery.eq('household_id', activeHouseholdId);
       }
       const { data: iData } = await itemsQuery;
-      if (iData) setListItems(iData);
+      if (iData && hasDataChanged(iData, listItemsRef.current)) {
+        setListItems(iData);
+      }
 
       // 5. Stock
       let stockQuery = supabase.from('grocery_stock' as any).select('*').order('category', { ascending: true });
@@ -170,7 +199,9 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
         stockQuery = stockQuery.eq('user_id', user.id).is('household_id', null);
       }
       const { data: sData } = await stockQuery;
-      if (sData) setStock(sData);
+      if (sData && hasDataChanged(sData, stockRef.current)) {
+        setStock(sData);
+      }
 
       // 6. Movements
       let movQuery = supabase.from('grocery_stock_movements' as any).select('*').order('created_at', { ascending: false }).limit(50);
@@ -180,7 +211,9 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
         movQuery = movQuery.eq('user_id', user.id).is('household_id', null);
       }
       const { data: movData } = await movQuery;
-      if (movData) setMovements(movData);
+      if (movData && hasDataChanged(movData, movementsRef.current)) {
+        setMovements(movData);
+      }
 
       // 7. Activity
       let actQuery = supabase.from('grocery_activity' as any).select('*').order('created_at', { ascending: false }).limit(40);
@@ -190,17 +223,84 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
         actQuery = actQuery.eq('user_id', user.id).is('household_id', null);
       }
       const { data: actData } = await actQuery;
-      if (actData) setActivities(actData);
+      if (actData && hasDataChanged(actData, activitiesRef.current)) {
+        setActivities(actData);
+      }
     } catch {
       // Graceful offline fallback
     } finally {
-      setLoading(false);
+      if (!isBackground) {
+        setLoading(false);
+      }
     }
   }, [user, activeHouseholdId]);
 
+  // Real-time automatic syncing: Supabase Realtime channel + 2-second silent background poll
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!user) return;
+
+    let isSubscribed = true;
+
+    // Run initial fetch
+    fetchData(false);
+
+    // Silent background sync runner (does not trigger any loading spinner or UI flicker)
+    const runSilentSync = async () => {
+      if (!isSubscribed) return;
+      // Skip background sync when browser tab is hidden to save battery
+      if (typeof document !== 'undefined' && document.hidden) return;
+      await fetchData(true);
+    };
+
+    // 2-second background interval for guaranteed synchronization
+    const intervalId = setInterval(runSilentSync, 2000);
+
+    // Sync immediately when returning to the tab
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        runSilentSync();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Instant WebSocket real-time subscription for 0ms reactivity
+    const targetChannelName = 'grocery-realtime-' + (activeHouseholdId || user.id);
+    const channel = supabase
+      .channel(targetChannelName)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'grocery_list_items' },
+        () => { runSilentSync(); }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'grocery_stock' },
+        () => { runSilentSync(); }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'grocery_lists' },
+        () => { runSilentSync(); }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'grocery_activity' },
+        () => { runSilentSync(); }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'grocery_household_members' },
+        () => { runSilentSync(); }
+      )
+      .subscribe();
+
+    return () => {
+      isSubscribed = false;
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      supabase.removeChannel(channel);
+    };
+  }, [user, activeHouseholdId, fetchData]);
 
   const switchHousehold = (id: string | null) => {
     setActiveHouseholdId(id);
