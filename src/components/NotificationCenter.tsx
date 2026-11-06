@@ -183,10 +183,10 @@ export function NotificationCenter({
       <SheetContent
         side="right"
         hideClose={true}
-        className="w-full sm:max-w-md p-0 flex flex-col bg-background/98 backdrop-blur-2xl border-l border-border/70 z-50 overflow-hidden shadow-2xl"
+        className="w-full sm:max-w-md p-0 flex flex-col bg-white dark:bg-card border-l border-border z-50 overflow-hidden shadow-2xl"
       >
         {/* Header with Safe Area spacing that clears iPhone Notch & Status Bar */}
-        <div className="pt-safe-modal px-4 sm:px-5 pb-3 border-b border-border/40 bg-background/90 backdrop-blur-md">
+        <div className="pt-safe-modal px-4 sm:px-5 pb-3 border-b border-border bg-white dark:bg-card">
           {/* Top Bar: Title, Count & Action Buttons */}
           <div className="flex items-center justify-between min-h-[44px]">
             <div className="flex items-center gap-2.5 min-w-0">
@@ -267,7 +267,7 @@ export function NotificationCenter({
         </div>
 
         {/* Scrollable Notification List */}
-        <div className="flex-1 overflow-y-auto px-4 py-3.5 space-y-3 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto px-4 py-3.5 space-y-3 scrollbar-hide bg-slate-50/80 dark:bg-zinc-950">
           {filteredNotifications.length === 0 ? (
             <div className="h-full min-h-[320px] flex flex-col items-center justify-center text-center p-6 text-muted-foreground">
               <div className="w-14 h-14 rounded-2xl bg-muted/60 border border-border/60 flex items-center justify-center mb-3 text-muted-foreground">
@@ -290,8 +290,8 @@ export function NotificationCenter({
                   className={cn(
                     'group relative rounded-2xl p-4 transition-all duration-150 border cursor-pointer tap-shrink',
                     isUnread
-                      ? 'bg-card border-primary/25 shadow-sm hover:border-primary/45'
-                      : 'bg-card/60 border-border/50 hover:bg-card/90 opacity-90 hover:opacity-100'
+                      ? 'bg-white dark:bg-card border-primary/30 shadow-sm hover:border-primary/50'
+                      : 'bg-white dark:bg-card border-border/70 hover:border-border'
                   )}
                 >
                   <div className="flex items-start gap-3.5">
@@ -383,7 +383,7 @@ export function NotificationCenter({
         </div>
 
         {/* Footer Bar with Safe-Area clearance */}
-        <div className="pb-safe-modal pt-3 px-4 sm:px-5 border-t border-border/40 bg-muted/20 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="pb-safe-modal pt-3 px-4 sm:px-5 border-t border-border bg-white dark:bg-card flex items-center justify-between text-xs text-muted-foreground">
           <span className="text-[11px] font-medium text-muted-foreground">
             {notifications.length} {notifications.length === 1 ? 'notification' : 'notifications'}
           </span>

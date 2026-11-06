@@ -127,14 +127,9 @@ export function DashboardPage({
       <div className="px-4 md:px-0 pt-2 flex items-center gap-3 card-enter">
         <AruxMascot size="md" className="tap-shrink" />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <p className="text-[11px] text-muted-foreground font-semibold tracking-wide">
-              {format(now, 'EEEE · d MMM')}
-            </p>
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">
-              Diwali ✨
-            </span>
-          </div>
+          <p className="text-[11px] text-muted-foreground font-semibold tracking-wide">
+            {format(now, 'EEEE · d MMM')}
+          </p>
           <h1 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight truncate">
             {firstName ? `Hi ${firstName}, ` : ''}<span className="gradient-text-fun">{getGreeting()}</span>
           </h1>

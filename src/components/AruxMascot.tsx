@@ -4,13 +4,11 @@ import diwaliMascot from '@/assets/diwali-mascot.jpg';
 interface AruxMascotProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  showDiyaBadge?: boolean;
 }
 
 export function AruxMascot({
   className,
   size = 'md',
-  showDiyaBadge = true,
 }: AruxMascotProps) {
   const sizeClasses = {
     sm: 'w-8 h-8 rounded-xl',
@@ -20,35 +18,18 @@ export function AruxMascot({
   };
 
   return (
-    <div className={cn('relative shrink-0 inline-block', className)}>
-      <div
-        className={cn(
-          'overflow-hidden shadow-sm border border-amber-400/50 bg-amber-500/10 p-0.5 transition-transform hover:scale-105 duration-200',
-          sizeClasses[size]
-        )}
-      >
-        <img
-          src={diwaliMascot}
-          alt="ARUX Diwali Mascot"
-          className="w-full h-full object-cover rounded-[inherit]"
-        />
-      </div>
-      {showDiyaBadge && (
-        <span
-          className={cn(
-            'absolute leading-none select-none drop-shadow-sm',
-            size === 'sm' && '-bottom-0.5 -right-0.5 text-[10px]',
-            size === 'md' && '-bottom-1 -right-1 text-xs',
-            size === 'lg' && '-bottom-1.5 -right-1.5 text-base',
-            size === 'xl' && '-bottom-2 -right-2 text-xl'
-          )}
-          role="img"
-          aria-label="Diwali Diya"
-        >
-          🪔
-        </span>
+    <div
+      className={cn(
+        'overflow-hidden shadow-sm shrink-0 border border-border/60 bg-muted/20 transition-transform duration-200',
+        sizeClasses[size],
+        className
       )}
+    >
+      <img
+        src={diwaliMascot}
+        alt="ARUX Logo"
+        className="w-full h-full object-cover"
+      />
     </div>
   );
 }
-
