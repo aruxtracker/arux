@@ -1088,6 +1088,25 @@
     .pt-safe-top { padding-top: 1.5rem; }
   }
 
+  /* Safe padding for full-screen / slide-over mobile sheets & modals to guarantee clearance from notch & status bar */
+  .pt-safe-modal {
+    padding-top: max(3.75rem, calc(env(safe-area-inset-top, 0px) + 1.25rem));
+  }
+  @media (min-width: 640px) {
+    .pt-safe-modal {
+      padding-top: 1.25rem;
+    }
+  }
+
+  .pb-safe-modal {
+    padding-bottom: max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem));
+  }
+  @media (min-width: 640px) {
+    .pb-safe-modal {
+      padding-bottom: 1rem;
+    }
+  }
+
   .animate-shake { animation: shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
   .animate-slide-up-fade { animation: slide-up-fade 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
 

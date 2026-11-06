@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdmin } from '@/hooks/useAdmin';
 import { useProfile, Gender } from '@/hooks/useProfile';
 import { AVATAR_PRESETS, getAvatar } from '@/lib/avatars';
 import { APP_VERSION, CHANGELOG, ROADMAP } from '@/lib/version';
@@ -139,6 +140,7 @@ function SubHeader({ title, onBack }: { title: string; onBack: () => void }) {
 export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, meetings, onNavigate, onStartTutorial }: SettingsPageProps) {
   const navigate = useNavigate();
   const { user, signOut, updatePassword } = useAuth();
+  const { isSuperAdmin } = useAdmin();
   const { profile, updateProfile } = useProfile();
   const [screen, setScreen] = useState<Screen>('root');
   const [installEvent, setInstallEvent] = useState<BIPEvent | null>(null);
@@ -854,15 +856,17 @@ export function SettingsPage({ settings, onUpdateSettings, incomes, expenses, me
         <Row icon={Share2} tint="var(--brand-purple)" title="Invite a friend" subtitle="Share ARUX with your contacts" onClick={() => setScreen('sharing')} />
       </Group>
 
-      <Group label="Administration" delay={160}>
-        <Row
-          icon={Crown}
-          tint="var(--brand-yellow)"
-          title="Super Admin Panel"
-          subtitle="Manage users, system broadcasts, feature flags & database"
-          onClick={() => navigate('/admin')}
-        />
-      </Group>
+      {isSuperAdmin && (
+        <Group label="Administration" delay={160}>
+          <Row
+            icon={Crown}
+            tint="var(--brand-yellow)"
+            title="Super Admin Panel"
+            subtitle="Manage users, system broadcasts, feature flags & database"
+            onClick={() => navigate('/admin')}
+          />
+        </Group>
+      )}
 
       <Group label="About" delay={180}>
         <Row icon={Rocket} tint="var(--brand-purple)" title="Coming soon" subtitle={`${ROADMAP.length} features on the roadmap`} onClick={() => setScreen('comingsoon')} />

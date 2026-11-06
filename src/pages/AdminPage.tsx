@@ -100,7 +100,7 @@ const STORAGE_SYSTEM_CONFIG = 'arux_super_admin_config_v1';
 export function AdminPage() {
   const navigate = useNavigate();
   const { user, signIn, signOut } = useAuth();
-  const { isSuperAdmin, role, checkingRole, dbTableExists, refetchRole, claimSuperAdminRole } = useAdmin();
+  const { isSuperAdmin, role, checkingRole, dbTableExists, refetchRole } = useAdmin();
 
   // Auth Form State (Email + Password only)
   const [authEmail, setAuthEmail] = useState('');
@@ -523,30 +523,8 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
             <h1 className="text-xl font-black text-foreground tracking-tight">Access Restricted</h1>
             <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
               Signed in as <code className="font-bold text-foreground">{user.email}</code>.
-              Your database role is <span className="font-bold uppercase text-amber-400">{role || 'user'}</span>, which does not have Super Admin permissions.
+              Your account does not have Super Admin permissions.
             </p>
-          </div>
-
-          {/* First time setup option: claim role if database tables aren't setup */}
-          <div className="p-4 rounded-2xl bg-muted/40 border border-border/60 text-left space-y-2">
-            <span className="text-xs font-bold text-foreground block">Are you the project owner?</span>
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              If this is your first time configuring your Supabase database, you can claim Super Admin status for your account below.
-            </p>
-            <Button
-              onClick={async () => {
-                const res = await claimSuperAdminRole();
-                if (res.success) {
-                  toast.success('Super Admin role granted to your account!');
-                  await refetchRole();
-                } else {
-                  toast.error(`Database setup needed: ${res.error}. Make sure user_roles table exists in Supabase.`);
-                }
-              }}
-              className="w-full h-9 rounded-xl gradient-primary text-xs font-bold mt-2"
-            >
-              <Crown className="w-3.5 h-3.5 mr-1.5 text-amber-300" /> Claim Super Admin Role
-            </Button>
           </div>
 
           <div className="pt-2 flex flex-col gap-2">

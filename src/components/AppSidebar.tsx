@@ -3,6 +3,7 @@ import { LayoutDashboard, TrendingUp, ShoppingBag, Calendar, Settings, LogOut, C
 import { TabId, Task, Meeting, Budget, Subscription, LentBorrowEntry, Habit, HabitLog, Expense } from '@/types';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdmin } from '@/hooks/useAdmin';
 import { BrandMark } from '@/components/BrandMark';
 import { NotificationCenter } from '@/components/NotificationCenter';
 
@@ -80,6 +81,7 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { isSuperAdmin } = useAdmin();
 
   return (
     <aside className="hidden md:flex flex-col w-64 min-h-screen border-r border-border/60 bg-sidebar/70 backdrop-blur-xl px-3 py-4 gap-1 sticky top-0 max-h-screen">
@@ -140,14 +142,18 @@ export function AppSidebar({
             <div className="flex-1 min-w-0">
               <p className="text-xs text-foreground font-semibold truncate">{user.email}</p>
               <div className="flex items-center gap-2 mt-0.5">
-                <button
-                  type="button"
-                  onClick={() => navigate('/admin')}
-                  className="flex items-center gap-1 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
-                >
-                  <Crown className="w-3 h-3" /> Admin
-                </button>
-                <span className="text-muted-foreground/40 text-[10px]">•</span>
+                {isSuperAdmin && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/admin')}
+                      className="flex items-center gap-1 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors"
+                    >
+                      <Crown className="w-3 h-3" /> Admin
+                    </button>
+                    <span className="text-muted-foreground/40 text-[10px]">•</span>
+                  </>
+                )}
                 <button
                   type="button"
                   onClick={signOut}
