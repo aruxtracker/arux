@@ -30,6 +30,12 @@ import {
   CheckSquare,
   CreditCard,
   Wallet,
+  X,
+  Plus,
+  Sparkles,
+  ChevronRight,
+  Shield,
+  User,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -47,14 +53,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -97,6 +95,55 @@ interface RealMetrics {
 const STORAGE_ADMIN_BROADCASTS = 'arux_admin_broadcasts_v1';
 const STORAGE_SYSTEM_CONFIG = 'arux_super_admin_config_v1';
 
+const SUPER_ADMIN_SQL = `-- ARUX Super Admin Setup Migration for Supabase
+-- Run this in your Supabase SQL Editor:
+-- https://supabase.com/dashboard/project/mcgptjnstxmnvkfnedxt/sql/new
+
+CREATE TABLE IF NOT EXISTS public.user_roles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+  role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin', 'super_admin')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS public.system_broadcasts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'update',
+  priority TEXT NOT NULL DEFAULT 'normal',
+  active BOOLEAN NOT NULL DEFAULT true,
+  action_tab TEXT,
+  created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE public.system_broadcasts ENABLE ROW LEVEL SECURITY;
+
+CREATE OR REPLACE FUNCTION public.is_admin(user_uuid UUID DEFAULT auth.uid())
+RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  RETURN EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = user_uuid AND role IN ('admin', 'super_admin'));
+END; $$;
+
+CREATE OR REPLACE FUNCTION public.is_super_admin(user_uuid UUID DEFAULT auth.uid())
+RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  RETURN EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = user_uuid AND role = 'super_admin');
+END; $$;
+
+-- RLS Policies
+DROP POLICY IF EXISTS "Admins can view all profiles" ON public.profiles;
+CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Anyone can view active broadcasts" ON public.system_broadcasts;
+CREATE POLICY "Anyone can view active broadcasts" ON public.system_broadcasts FOR SELECT USING (active = true OR public.is_admin());
+
+DROP POLICY IF EXISTS "Admins can manage broadcasts" ON public.system_broadcasts;
+CREATE POLICY "Admins can manage broadcasts" ON public.system_broadcasts FOR ALL USING (public.is_admin());
+`;
+
 export function AdminPage() {
   const navigate = useNavigate();
   const { user, signIn, signOut } = useAuth();
@@ -110,6 +157,7 @@ export function AdminPage() {
 
   // Admin Navigation
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'broadcasts' | 'system' | 'security'>('overview');
+  const [broadcastSubTab, setBroadcastSubTab] = useState<'list' | 'compose'>('list');
   const [copiedSql, setCopiedSql] = useState(false);
   const [loadingStats, setLoadingStats] = useState(false);
 
@@ -130,8 +178,7 @@ export function AdminPage() {
   const [realProfiles, setRealProfiles] = useState<RealProfile[]>([]);
   const [broadcasts, setBroadcasts] = useState<RealBroadcast[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
-  const [selectedProfile, setSelectedProfile] = useState<RealProfile | null>(null);
+  const [roleFilter, setRoleFilter] = useState<'all' | 'super_admin' | 'admin' | 'user'>('all');
 
   // Broadcast Form
   const [bcTitle, setBcTitle] = useState('');
@@ -249,7 +296,6 @@ export function AdminPage() {
         if (!bcError && bcData) {
           setBroadcasts(bcData as any);
         } else {
-          // Fallback to local storage if table not yet run
           const stored = localStorage.getItem(STORAGE_ADMIN_BROADCASTS);
           if (stored) setBroadcasts(JSON.parse(stored));
         }
@@ -319,9 +365,8 @@ export function AdminPage() {
 
       if (!error && data) {
         setBroadcasts((prev) => [data as any, ...prev]);
-        toast.success('Broadcast saved to Supabase database!');
+        toast.success('Broadcast saved to database!');
       } else {
-        // Fallback local
         const localItem: RealBroadcast = {
           id: `bc-${Date.now()}`,
           ...payload,
@@ -336,8 +381,10 @@ export function AdminPage() {
       setBcTitle('');
       setBcMessage('');
       setBcActionTab('');
+      setBroadcastSubTab('list');
     } catch {
       toast.success('Broadcast published!');
+      setBroadcastSubTab('list');
     }
   };
 
@@ -386,44 +433,42 @@ export function AdminPage() {
 
   // Copy SQL script for Supabase
   const handleCopySql = () => {
-    const sql = `-- ARUX Super Admin Setup Migration for Supabase
--- Run this in your Supabase SQL Editor:
--- https://supabase.com/dashboard/project/mcgptjnstxmnvkfnedxt/sql/new
-
-CREATE TABLE IF NOT EXISTS public.user_roles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
-  role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin', 'super_admin')),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
-
-CREATE OR REPLACE FUNCTION public.is_admin(user_uuid UUID DEFAULT auth.uid())
-RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-BEGIN
-  RETURN EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = user_uuid AND role IN ('admin', 'super_admin'));
-END; $$;
-
-CREATE OR REPLACE FUNCTION public.is_super_admin(user_uuid UUID DEFAULT auth.uid())
-RETURNS BOOLEAN LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-BEGIN
-  RETURN EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = user_uuid AND role = 'super_admin');
-END; $$;
-
-CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING (public.is_admin());
-`;
-    navigator.clipboard.writeText(sql);
+    navigator.clipboard.writeText(SUPER_ADMIN_SQL);
     setCopiedSql(true);
-    toast.success('SQL migration script copied!');
+    toast.success('SQL migration script copied to clipboard!');
     setTimeout(() => setCopiedSql(false), 2500);
   };
 
+  const handleCopyUserId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    toast.success('User ID copied to clipboard');
+  };
+
+  // Role summary counts
+  const roleCounts = useMemo(() => {
+    let admins = 0;
+    let superAdmins = 0;
+    let regular = 0;
+    realProfiles.forEach((p) => {
+      if (p.role === 'super_admin') superAdmins++;
+      else if (p.role === 'admin') admins++;
+      else regular++;
+    });
+    return {
+      all: realProfiles.length,
+      super_admin: superAdmins,
+      admin: admins,
+      user: regular,
+    };
+  }, [realProfiles]);
+
   const filteredProfiles = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return realProfiles.filter((p) => {
       const name = p.display_name?.toLowerCase() || '';
       const email = p.email?.toLowerCase() || '';
-      const matchesSearch = name.includes(searchQuery.toLowerCase()) || email.includes(searchQuery.toLowerCase());
+      const id = p.user_id.toLowerCase();
+      const matchesSearch = !q || name.includes(q) || email.includes(q) || id.includes(q);
       const matchesRole = roleFilter === 'all' || p.role === roleFilter;
       return matchesSearch && matchesRole;
     });
@@ -435,14 +480,14 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
   if (!user) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-3xl bg-card border border-border/70 p-6 md:p-8 card-shadow shadow-2xl card-enter">
+        <div className="w-full max-w-md rounded-3xl bg-card border border-border/70 p-6 sm:p-8 card-shadow shadow-2xl card-enter">
           <div className="text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mx-auto mb-3 text-amber-400">
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mx-auto mb-3 text-amber-400 shadow-sm">
               <Crown className="w-7 h-7" />
             </div>
-            <h1 className="text-2xl font-black text-foreground tracking-tight">Super Admin Login</h1>
+            <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">Admin Sign In</h1>
             <p className="text-xs text-muted-foreground mt-1">
-              Authenticate with your registered administrative email & password.
+              Enter your administrative credentials to access the console.
             </p>
           </div>
 
@@ -456,7 +501,7 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
                   placeholder="admin@arux.app"
                   value={authEmail}
                   onChange={(e) => setAuthEmail(e.target.value)}
-                  className="pl-9 h-11 rounded-xl"
+                  className="pl-9 h-11 rounded-xl text-xs"
                   required
                   autoFocus
                 />
@@ -472,7 +517,7 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
                   placeholder="••••••••"
                   value={authPassword}
                   onChange={(e) => setAuthPassword(e.target.value)}
-                  className="pl-9 h-11 rounded-xl"
+                  className="pl-9 h-11 rounded-xl text-xs"
                   required
                 />
               </div>
@@ -488,16 +533,16 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
             <Button
               type="submit"
               disabled={authLoading}
-              className="w-full h-11 rounded-xl gradient-primary font-bold shadow-md"
+              className="w-full h-11 rounded-xl gradient-primary font-bold shadow-md text-xs tap-shrink"
             >
-              {authLoading ? 'Verifying Credentials...' : 'Sign In as Super Admin'}
+              {authLoading ? 'Verifying...' : 'Sign In as Super Admin'}
             </Button>
           </form>
 
           <div className="mt-6 pt-5 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
             <button
               onClick={() => navigate('/')}
-              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+              className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors tap-shrink font-medium"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Return to App
             </button>
@@ -514,7 +559,7 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
   if (!isSuperAdmin) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-3xl bg-card border border-border/70 p-6 md:p-8 card-shadow shadow-2xl text-center card-enter space-y-5">
+        <div className="w-full max-w-md rounded-3xl bg-card border border-border/70 p-6 sm:p-8 card-shadow shadow-2xl text-center card-enter space-y-5">
           <div className="w-14 h-14 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center mx-auto text-destructive">
             <ShieldAlert className="w-7 h-7" />
           </div>
@@ -534,7 +579,7 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
                 await signOut();
                 toast.info('Signed out. Please log in with your Super Admin account.');
               }}
-              className="w-full h-10 rounded-xl text-xs gap-1.5"
+              className="w-full h-10 rounded-xl text-xs gap-1.5 tap-shrink"
             >
               <LogOut className="w-3.5 h-3.5" /> Sign in with different email
             </Button>
@@ -542,7 +587,7 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
-              className="w-full h-10 rounded-xl text-xs text-muted-foreground hover:text-foreground"
+              className="w-full h-10 rounded-xl text-xs text-muted-foreground hover:text-foreground tap-shrink"
             >
               <ArrowLeft className="w-3.5 h-3.5 mr-1.5" /> Return to Home
             </Button>
@@ -557,75 +602,79 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
   // ========================================================
   return (
     <div className="min-h-screen bg-background flex flex-col text-foreground">
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-xl border-b border-border/60 px-4 md:px-8 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center text-primary-foreground shadow-sm">
-            <Crown className="w-5 h-5 text-amber-300" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-extrabold text-foreground tracking-tight">
-                ARUX Super Admin
-              </h1>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/15 text-amber-400 border border-amber-500/30 uppercase tracking-wider">
-                Live DB
-              </span>
+      {/* Top Mobile-First Header */}
+      <header className="sticky top-0 z-40 bg-card/90 dark:bg-card/90 backdrop-blur-xl border-b border-border/60 px-3.5 sm:px-6 md:px-8 py-2.5 sm:py-3.5">
+        <div className="flex items-center justify-between gap-2 max-w-7xl mx-auto w-full">
+          {/* Left: Back button + title & status */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <button
+              onClick={() => navigate('/')}
+              aria-label="Back to App"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-muted/60 border border-border/60 flex items-center justify-center text-foreground hover:bg-muted transition-colors tap-shrink shrink-0"
+              title="Return to App Home"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <Crown className="w-4 h-4 text-amber-400 shrink-0" />
+                <h1 className="text-sm sm:text-base font-extrabold text-foreground tracking-tight truncate">
+                  Admin Panel
+                </h1>
+                <span className="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 uppercase tracking-wider shrink-0 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live
+                </span>
+              </div>
+              <p className="text-[10px] text-muted-foreground truncate hidden xs:block">
+                {user.email}
+              </p>
             </div>
-            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Signed in as <strong className="text-foreground">{user.email}</strong></span>
-            </p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={fetchRealDatabaseData}
-            disabled={loadingStats}
-            className="rounded-xl h-9 text-xs gap-1.5"
-          >
-            <RefreshCw className={cn('w-3.5 h-3.5', loadingStats && 'animate-spin')} />
-            <span className="hidden sm:inline">Sync Live DB</span>
-          </Button>
+          {/* Right: Quick actions */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={fetchRealDatabaseData}
+              disabled={loadingStats}
+              className="rounded-xl h-8 sm:h-9 px-2.5 sm:px-3 text-xs gap-1.5 border-border/70 tap-shrink"
+              title="Sync Live DB"
+            >
+              <RefreshCw className={cn('w-3.5 h-3.5 text-primary', loadingStats && 'animate-spin')} />
+              <span className="hidden sm:inline">Refresh</span>
+            </Button>
 
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => navigate('/')}
-            className="rounded-xl h-9 text-xs gap-1.5"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>App Home</span>
-          </Button>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={async () => {
-              await signOut();
-              navigate('/auth');
-              toast.info('Signed out of Super Admin');
-            }}
-            className="rounded-xl h-9 text-xs text-muted-foreground hover:text-destructive"
-          >
-            <LogOut className="w-3.5 h-3.5 mr-1" /> Sign out
-          </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={async () => {
+                await signOut();
+                navigate('/auth');
+                toast.info('Signed out of Admin');
+              }}
+              className="rounded-xl h-8 sm:h-9 px-2 sm:px-2.5 text-xs text-muted-foreground hover:text-destructive tap-shrink"
+              title="Sign Out"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden md:inline ml-1">Sign Out</span>
+            </Button>
+          </div>
         </div>
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-6 space-y-6">
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide border-b border-border/50 pb-3">
+      <div className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 md:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        {/* Navigation Tabs (Mobile-optimized pill scroller) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1 box-border">
           {[
-            { id: 'overview', label: 'Live Overview', icon: BarChart3 },
-            { id: 'users', label: 'Database Users', count: realProfiles.length, icon: Users },
-            { id: 'broadcasts', label: 'System Broadcasts', count: broadcasts.length, icon: Radio },
-            { id: 'system', label: 'Feature Toggles', icon: Sliders },
-            { id: 'security', label: 'Database Schema & SQL', icon: ShieldCheck },
+            { id: 'overview', label: 'Overview', icon: BarChart3 },
+            { id: 'users', label: 'Users', count: realProfiles.length, icon: Users },
+            { id: 'broadcasts', label: 'Broadcasts', count: broadcasts.length, icon: Radio },
+            { id: 'system', label: 'Features', icon: Sliders },
+            { id: 'security', label: 'SQL Setup', icon: ShieldCheck },
           ].map((tab) => {
             const active = activeTab === tab.id;
             const Icon = tab.icon;
@@ -634,19 +683,19 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={cn(
-                  'px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 flex items-center gap-2 tap-shrink',
+                  'px-3 sm:px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-150 flex items-center gap-1.5 tap-shrink shrink-0',
                   active
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground'
+                    ? 'bg-primary text-primary-foreground shadow-pop'
+                    : 'bg-card border border-border/60 hover:bg-muted text-muted-foreground hover:text-foreground'
                 )}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-3.5 h-3.5 shrink-0" />
                 <span>{tab.label}</span>
                 {tab.count !== undefined && (
                   <span
                     className={cn(
-                      'text-[10px] font-bold px-1.5 py-0.2 rounded-full',
-                      active ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'
+                      'text-[9px] font-extrabold px-1.5 py-0.2 rounded-full',
+                      active ? 'bg-primary-foreground/25 text-primary-foreground' : 'bg-muted text-muted-foreground'
                     )}
                   >
                     {tab.count}
@@ -657,121 +706,348 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
           })}
         </div>
 
-        {/* TAB 1: LIVE DATABASE OVERVIEW */}
+        {/* ======================================================== */}
+        {/* TAB 1: OVERVIEW */}
+        {/* ======================================================== */}
         {activeTab === 'overview' && (
-          <div className="space-y-6 card-enter">
-            {/* Live Metrics Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="rounded-2xl bg-card border border-border/60 p-5 shadow-xs">
-                <div className="flex items-center justify-between text-muted-foreground mb-2">
-                  <span className="text-xs font-semibold uppercase tracking-wider">Registered Profiles</span>
-                  <Users className="w-4 h-4 text-primary" />
+          <div className="space-y-4 sm:space-y-6 card-enter">
+            {/* Quick Hero Banner */}
+            <div className="rounded-2xl p-4 sm:p-5 bg-card border border-border/70 card-shadow flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">
+                    Live Supabase Project
+                  </p>
                 </div>
-                <div className="text-2xl font-black text-foreground">
-                  {metrics.totalProfiles}
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-1">Live from `profiles` table</p>
-              </div>
-
-              <div className="rounded-2xl bg-card border border-border/60 p-5 shadow-xs">
-                <div className="flex items-center justify-between text-muted-foreground mb-2">
-                  <span className="text-xs font-semibold uppercase tracking-wider">Real Transaction Volume</span>
-                  <TrendingUp className="w-4 h-4 text-emerald-500" />
-                </div>
-                <div className="text-2xl font-black text-foreground">
-                  ₹{metrics.totalExpensesSum.toLocaleString('en-IN')}
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-1">
-                  {metrics.totalExpensesCount} expenses • {metrics.totalIncomesCount} incomes
+                <h2 className="text-lg sm:text-xl font-black text-foreground tracking-tight">
+                  mcgptjnstxmnvkfnedxt
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  Real-time database sync active with {metrics.totalProfiles} registered profiles.
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-card border border-border/60 p-5 shadow-xs">
-                <div className="flex items-center justify-between text-muted-foreground mb-2">
-                  <span className="text-xs font-semibold uppercase tracking-wider">Tasks Tracked</span>
-                  <CheckSquare className="w-4 h-4 text-purple-400" />
-                </div>
-                <div className="text-2xl font-black text-foreground">
-                  {metrics.totalTasksCount}
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-1">
-                  {metrics.completedTasksCount} completed ({metrics.totalTasksCount > 0 ? Math.round((metrics.completedTasksCount / metrics.totalTasksCount) * 100) : 0}%)
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-card border border-border/60 p-5 shadow-xs">
-                <div className="flex items-center justify-between text-muted-foreground mb-2">
-                  <span className="text-xs font-semibold uppercase tracking-wider">Database Status</span>
-                  <Server className="w-4 h-4 text-teal-400" />
-                </div>
-                <div className="text-2xl font-black text-emerald-400">Connected</div>
-                <p className="text-[11px] text-muted-foreground mt-1">Supabase mcgptjnstxmnvkfnedxt</p>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Button
+                  size="sm"
+                  onClick={() => setActiveTab('users')}
+                  className="flex-1 sm:flex-initial h-9 rounded-xl gradient-primary text-xs font-bold gap-1.5 tap-shrink"
+                >
+                  <Users className="w-3.5 h-3.5" /> Manage Users
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setActiveTab('broadcasts')}
+                  className="flex-1 sm:flex-initial h-9 rounded-xl text-xs font-bold gap-1.5 tap-shrink"
+                >
+                  <Send className="w-3.5 h-3.5" /> Broadcast
+                </Button>
               </div>
             </div>
 
-            {/* Modules Summary */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-4 rounded-xl bg-card border border-border/60">
-                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground mb-1">
-                  <Activity className="w-3.5 h-3.5 text-orange-400" /> Habits Logged
+            {/* Primary 2x2 on Mobile, 4-col on Desktop */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+              <div className="rounded-2xl bg-card border border-border/60 p-3.5 sm:p-5 card-shadow flex flex-col justify-between">
+                <div className="flex items-center justify-between text-muted-foreground mb-2">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Profiles</span>
+                  <Users className="w-4 h-4 text-primary shrink-0" />
                 </div>
-                <p className="text-lg font-black text-foreground">{metrics.totalHabitsCount}</p>
+                <div>
+                  <div className="text-xl sm:text-2xl font-black text-foreground">
+                    {metrics.totalProfiles}
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                    Registered users
+                  </p>
+                </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-card border border-border/60">
-                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground mb-1">
-                  <Wallet className="w-3.5 h-3.5 text-blue-400" /> Budgets Configured
+              <div className="rounded-2xl bg-card border border-border/60 p-3.5 sm:p-5 card-shadow flex flex-col justify-between">
+                <div className="flex items-center justify-between text-muted-foreground mb-2">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Transactions</span>
+                  <TrendingUp className="w-4 h-4 text-emerald-500 shrink-0" />
                 </div>
-                <p className="text-lg font-black text-foreground">{metrics.totalBudgetsCount}</p>
+                <div>
+                  <div className="text-xl sm:text-2xl font-black text-foreground">
+                    ₹{metrics.totalExpensesSum.toLocaleString('en-IN')}
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                    {metrics.totalExpensesCount} exp • {metrics.totalIncomesCount} inc
+                  </p>
+                </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-card border border-border/60">
-                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground mb-1">
-                  <CreditCard className="w-3.5 h-3.5 text-purple-400" /> Subscriptions
+              <div className="rounded-2xl bg-card border border-border/60 p-3.5 sm:p-5 card-shadow flex flex-col justify-between">
+                <div className="flex items-center justify-between text-muted-foreground mb-2">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Tasks</span>
+                  <CheckSquare className="w-4 h-4 text-purple-400 shrink-0" />
                 </div>
-                <p className="text-lg font-black text-foreground">{metrics.totalSubscriptionsCount}</p>
+                <div>
+                  <div className="text-xl sm:text-2xl font-black text-foreground">
+                    {metrics.totalTasksCount}
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                    {metrics.completedTasksCount} done ({metrics.totalTasksCount > 0 ? Math.round((metrics.completedTasksCount / metrics.totalTasksCount) * 100) : 0}%)
+                  </p>
+                </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-card border border-border/60">
-                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground mb-1">
-                  <Radio className="w-3.5 h-3.5 text-amber-400" /> Active Broadcasts
+              <div className="rounded-2xl bg-card border border-border/60 p-3.5 sm:p-5 card-shadow flex flex-col justify-between">
+                <div className="flex items-center justify-between text-muted-foreground mb-2">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Status</span>
+                  <Server className="w-4 h-4 text-teal-400 shrink-0" />
                 </div>
-                <p className="text-lg font-black text-foreground">{broadcasts.length}</p>
+                <div>
+                  <div className="text-xl sm:text-2xl font-black text-emerald-500">
+                    Connected
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
+                    Healthy Supabase DB
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Secondary Metrics Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+              <div className="p-3 sm:p-4 rounded-xl bg-card border border-border/60">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground mb-1">
+                  <Activity className="w-3.5 h-3.5 text-orange-400 shrink-0" /> Habits
+                </div>
+                <p className="text-base sm:text-lg font-black text-foreground">{metrics.totalHabitsCount}</p>
+              </div>
+
+              <div className="p-3 sm:p-4 rounded-xl bg-card border border-border/60">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground mb-1">
+                  <Wallet className="w-3.5 h-3.5 text-blue-400 shrink-0" /> Budgets
+                </div>
+                <p className="text-base sm:text-lg font-black text-foreground">{metrics.totalBudgetsCount}</p>
+              </div>
+
+              <div className="p-3 sm:p-4 rounded-xl bg-card border border-border/60">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground mb-1">
+                  <CreditCard className="w-3.5 h-3.5 text-purple-400 shrink-0" /> Subscriptions
+                </div>
+                <p className="text-base sm:text-lg font-black text-foreground">{metrics.totalSubscriptionsCount}</p>
+              </div>
+
+              <div className="p-3 sm:p-4 rounded-xl bg-card border border-border/60">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground mb-1">
+                  <Radio className="w-3.5 h-3.5 text-amber-400 shrink-0" /> Broadcasts
+                </div>
+                <p className="text-base sm:text-lg font-black text-foreground">{broadcasts.length}</p>
+              </div>
+            </div>
+
+            {/* Quick Navigation Shortcuts */}
+            <div className="p-4 rounded-2xl bg-muted/30 border border-border/60 space-y-2">
+              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide">
+                Quick Shortcuts
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('users')}
+                  className="p-3 rounded-xl bg-card border border-border/60 hover:border-primary/40 text-left flex items-center justify-between transition-colors tap-shrink"
+                >
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" />
+                    <div>
+                      <p className="text-xs font-bold text-foreground">User Roles</p>
+                      <p className="text-[10px] text-muted-foreground">Promote / demote admins</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('system')}
+                  className="p-3 rounded-xl bg-card border border-border/60 hover:border-primary/40 text-left flex items-center justify-between transition-colors tap-shrink"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sliders className="w-4 h-4 text-primary" />
+                    <div>
+                      <p className="text-xs font-bold text-foreground">App Switches</p>
+                      <p className="text-[10px] text-muted-foreground">Maintenance, AI, Beta</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('security')}
+                  className="p-3 rounded-xl bg-card border border-border/60 hover:border-primary/40 text-left flex items-center justify-between transition-colors tap-shrink"
+                >
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-primary" />
+                    <div>
+                      <p className="text-xs font-bold text-foreground">Database SQL</p>
+                      <p className="text-[10px] text-muted-foreground">Copy migration script</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* TAB 2: REAL USERS DIRECTORY */}
+        {/* ======================================================== */}
+        {/* TAB 2: DATABASE USERS (MOBILE-FIRST REDESIGN) */}
+        {/* ======================================================== */}
         {activeTab === 'users' && (
-          <div className="space-y-4 card-enter">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card border border-border/60 p-4 rounded-2xl">
-              <div className="relative flex-1">
-                <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-3" />
-                <Input
-                  placeholder="Search database profiles by name or ID..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-10 rounded-xl"
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <select
-                  value={roleFilter}
-                  onChange={(e) => setRoleFilter(e.target.value)}
-                  className="h-10 px-3 rounded-xl bg-background border border-border/80 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          <div className="space-y-3.5 sm:space-y-4 card-enter">
+            {/* Search Input with Clear Button */}
+            <div className="relative">
+              <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                placeholder="Search by name, email, or user ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-9 h-10 sm:h-11 rounded-xl bg-card text-xs font-medium"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="w-7 h-7 rounded-lg absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted-foreground hover:text-foreground tap-shrink"
                 >
-                  <option value="all">All Roles</option>
-                  <option value="super_admin">Super Admins</option>
-                  <option value="admin">Admins</option>
-                  <option value="user">Regular Users</option>
-                </select>
-              </div>
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
-            {/* Table */}
-            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden shadow-xs">
+            {/* Quick 1-Tap Filter Chips */}
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-0.5">
+              {[
+                { id: 'all', label: 'All', count: roleCounts.all },
+                { id: 'super_admin', label: 'Super Admins', count: roleCounts.super_admin },
+                { id: 'admin', label: 'Admins', count: roleCounts.admin },
+                { id: 'user', label: 'Users', count: roleCounts.user },
+              ].map((chip) => {
+                const active = roleFilter === chip.id;
+                return (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={() => setRoleFilter(chip.id as any)}
+                    className={cn(
+                      'px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors whitespace-nowrap flex items-center gap-1.5 tap-shrink shrink-0',
+                      active
+                        ? 'bg-foreground text-background shadow-xs'
+                        : 'bg-card border border-border/70 text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    <span>{chip.label}</span>
+                    <span
+                      className={cn(
+                        'text-[10px] px-1.5 rounded-full font-extrabold',
+                        active ? 'bg-background/20 text-background' : 'bg-muted text-muted-foreground'
+                      )}
+                    >
+                      {chip.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* MOBILE VIEW: Touch-Friendly User Cards (< md) */}
+            <div className="md:hidden space-y-2.5">
+              {filteredProfiles.length === 0 ? (
+                <div className="p-8 text-center rounded-2xl bg-card border border-border/60 text-muted-foreground text-xs">
+                  No users found matching your search.
+                </div>
+              ) : (
+                filteredProfiles.map((p) => {
+                  const isCurrent = p.user_id === user.id;
+                  const isSuper = p.role === 'super_admin';
+                  const isAdmin = p.role === 'admin';
+
+                  return (
+                    <div
+                      key={p.id}
+                      className="p-3.5 rounded-2xl bg-card border border-border/70 card-shadow space-y-2.5"
+                    >
+                      {/* Top row: Avatar + Name/Email + Role Badge */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center text-primary-foreground font-black text-xs shrink-0 shadow-xs">
+                            {(p.display_name || 'U').charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-extrabold text-xs text-foreground truncate flex items-center gap-1.5">
+                              <span>{p.display_name || 'Unnamed User'}</span>
+                              {isCurrent && (
+                                <span className="text-[10px] font-semibold text-primary">(You)</span>
+                              )}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground truncate">
+                              {p.email || 'Registered User'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Role Badge */}
+                        <span
+                          className={cn(
+                            'px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border shrink-0',
+                            isSuper
+                              ? 'bg-amber-500/15 text-amber-500 border-amber-500/30'
+                              : isAdmin
+                              ? 'bg-purple-500/15 text-purple-400 border-purple-500/30'
+                              : 'bg-muted text-muted-foreground border-border/50'
+                          )}
+                        >
+                          {p.role || 'user'}
+                        </span>
+                      </div>
+
+                      {/* Bottom row: User ID & Action */}
+                      <div className="pt-1.5 border-t border-border/40 flex items-center justify-between gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleCopyUserId(p.user_id)}
+                          className="font-mono text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1 truncate tap-shrink bg-muted/40 px-2 py-1 rounded-md"
+                          title="Click to copy full ID"
+                        >
+                          <Copy className="w-3 h-3 shrink-0" />
+                          <span>{p.user_id.slice(0, 8)}...</span>
+                        </button>
+
+                        {!isCurrent && (
+                          <Button
+                            size="sm"
+                            variant={isAdmin ? 'outline' : 'default'}
+                            onClick={() =>
+                              handleChangeUserRole(
+                                p.user_id,
+                                isAdmin ? 'user' : 'admin'
+                              )
+                            }
+                            className={cn(
+                              'h-7 px-2.5 text-[11px] font-bold rounded-lg tap-shrink',
+                              isAdmin
+                                ? 'text-destructive hover:bg-destructive/10 border-destructive/30'
+                                : 'gradient-primary'
+                            )}
+                          >
+                            {isAdmin ? 'Demote to User' : 'Make Admin'}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* DESKTOP VIEW: Data Table (md+) */}
+            <div className="hidden md:block rounded-2xl border border-border/60 bg-card overflow-hidden card-shadow">
               <Table>
                 <TableHeader>
                   <TableRow className="border-border/60 bg-muted/30">
@@ -790,68 +1066,86 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredProfiles.map((p) => (
-                      <TableRow key={p.id} className="border-border/40 hover:bg-muted/30">
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-black text-xs shrink-0">
-                              {(p.display_name || 'U').charAt(0).toUpperCase()}
+                    filteredProfiles.map((p) => {
+                      const isCurrent = p.user_id === user.id;
+                      const isSuper = p.role === 'super_admin';
+                      const isAdmin = p.role === 'admin';
+
+                      return (
+                        <TableRow key={p.id} className="border-border/40 hover:bg-muted/30">
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-black text-xs shrink-0">
+                                {(p.display_name || 'U').charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="font-bold text-xs text-foreground">
+                                  {p.display_name || 'Unnamed User'}
+                                  {isCurrent && <span className="text-primary ml-1">(You)</span>}
+                                </p>
+                                {p.email && <p className="text-[11px] text-muted-foreground">{p.email}</p>}
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-bold text-xs text-foreground">{p.display_name || 'Unnamed User'}</p>
-                              {p.email && <p className="text-[11px] text-muted-foreground">{p.email}</p>}
-                            </div>
-                          </div>
-                        </TableCell>
+                          </TableCell>
 
-                        <TableCell>
-                          <code className="text-[11px] font-mono text-muted-foreground">
-                            {p.user_id.slice(0, 12)}...
-                          </code>
-                        </TableCell>
+                          <TableCell>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyUserId(p.user_id)}
+                              className="font-mono text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-1 tap-shrink"
+                              title="Click to copy ID"
+                            >
+                              <span>{p.user_id.slice(0, 12)}...</span>
+                              <Copy className="w-3 h-3" />
+                            </button>
+                          </TableCell>
 
-                        <TableCell>
-                          <span
-                            className={cn(
-                              'px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border',
-                              p.role === 'super_admin'
-                                ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
-                                : p.role === 'admin'
-                                ? 'bg-purple-500/15 text-purple-400 border-purple-500/30'
-                                : 'bg-muted text-muted-foreground border-border/50'
-                            )}
-                          >
-                            {p.role || 'user'}
-                          </span>
-                        </TableCell>
+                          <TableCell>
+                            <span
+                              className={cn(
+                                'px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border',
+                                isSuper
+                                  ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                                  : isAdmin
+                                  ? 'bg-purple-500/15 text-purple-400 border-purple-500/30'
+                                  : 'bg-muted text-muted-foreground border-border/50'
+                              )}
+                            >
+                              {p.role || 'user'}
+                            </span>
+                          </TableCell>
 
-                        <TableCell>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(p.created_at).toLocaleDateString()}
-                          </span>
-                        </TableCell>
+                          <TableCell>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(p.created_at).toLocaleDateString()}
+                            </span>
+                          </TableCell>
 
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {p.user_id !== user.id && (
+                          <TableCell className="text-right">
+                            {!isCurrent && (
                               <Button
                                 size="sm"
-                                variant="outline"
+                                variant={isAdmin ? 'outline' : 'default'}
                                 onClick={() =>
                                   handleChangeUserRole(
                                     p.user_id,
-                                    p.role === 'admin' ? 'user' : 'admin'
+                                    isAdmin ? 'user' : 'admin'
                                   )
                                 }
-                                className="h-8 px-2 text-xs"
+                                className={cn(
+                                  'h-8 px-2.5 text-xs font-bold rounded-xl tap-shrink',
+                                  isAdmin
+                                    ? 'text-destructive hover:bg-destructive/10 border-destructive/30'
+                                    : 'gradient-primary'
+                                )}
                               >
-                                {p.role === 'admin' ? 'Demote to User' : 'Make Admin'}
+                                {isAdmin ? 'Demote to User' : 'Make Admin'}
                               </Button>
                             )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
@@ -859,197 +1153,270 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
           </div>
         )}
 
-        {/* TAB 3: SYSTEM BROADCASTS */}
+        {/* ======================================================== */}
+        {/* TAB 3: SYSTEM BROADCASTS (MOBILE STREAMLINED) */}
+        {/* ======================================================== */}
         {activeTab === 'broadcasts' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 card-enter">
-            {/* Form */}
-            <div className="rounded-2xl bg-card border border-border/60 p-5 space-y-4">
-              <div>
-                <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                  <Send className="w-4 h-4 text-primary" /> Publish Announcement
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Pushes immediately into all users' Notification Center.
-                </p>
-              </div>
-
-              <form onSubmit={handleCreateBroadcast} className="space-y-3.5">
-                <div>
-                  <Label className="text-xs font-semibold">Title</Label>
-                  <Input
-                    placeholder="e.g. Server Maintenance or New Feature"
-                    value={bcTitle}
-                    onChange={(e) => setBcTitle(e.target.value)}
-                    className="mt-1 h-9 rounded-xl text-xs"
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-xs font-semibold">Category</Label>
-                  <select
-                    value={bcCategory}
-                    onChange={(e) => setBcCategory(e.target.value as any)}
-                    className="w-full mt-1 h-9 px-3 rounded-xl bg-background border border-border text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                  >
-                    <option value="update">🚀 App Update</option>
-                    <option value="alert">⚠️ Urgent Alert</option>
-                    <option value="info">💡 Tip & Information</option>
-                  </select>
-                </div>
-
-                <div>
-                  <Label className="text-xs font-semibold">Message</Label>
-                  <Textarea
-                    placeholder="Write your broadcast message..."
-                    value={bcMessage}
-                    onChange={(e) => setBcMessage(e.target.value)}
-                    className="mt-1 rounded-xl text-xs min-h-[90px]"
-                  />
-                </div>
-
-                <Button type="submit" className="w-full h-10 rounded-xl gradient-primary font-bold text-xs">
-                  <Send className="w-3.5 h-3.5 mr-1.5" /> Publish to Real DB
-                </Button>
-              </form>
+          <div className="space-y-4 card-enter">
+            {/* Mobile Subtab Toggle */}
+            <div className="lg:hidden flex p-1 rounded-xl bg-muted/50 border border-border/60">
+              <button
+                type="button"
+                onClick={() => setBroadcastSubTab('list')}
+                className={cn(
+                  'flex-1 py-1.5 rounded-lg text-xs font-bold transition-all tap-shrink',
+                  broadcastSubTab === 'list'
+                    ? 'bg-card text-foreground shadow-xs font-extrabold'
+                    : 'text-muted-foreground'
+                )}
+              >
+                Broadcasts ({broadcasts.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setBroadcastSubTab('compose')}
+                className={cn(
+                  'flex-1 py-1.5 rounded-lg text-xs font-bold transition-all tap-shrink flex items-center justify-center gap-1',
+                  broadcastSubTab === 'compose'
+                    ? 'bg-card text-foreground shadow-xs font-extrabold'
+                    : 'text-muted-foreground'
+                )}
+              >
+                <Plus className="w-3.5 h-3.5" /> New Broadcast
+              </button>
             </div>
 
-            {/* List */}
-            <div className="lg:col-span-2 rounded-2xl bg-card border border-border/60 p-5 space-y-4">
-              <h3 className="text-sm font-bold text-foreground flex items-center justify-between">
-                <span>Active Broadcasts ({broadcasts.length})</span>
-                <span className="text-xs text-muted-foreground font-normal">Realtime Sync</span>
-              </h3>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+              {/* Form (Always visible on desktop, tabbed on mobile) */}
+              <div
+                className={cn(
+                  'rounded-2xl bg-card border border-border/70 p-4 sm:p-5 space-y-4 card-shadow',
+                  broadcastSubTab === 'list' ? 'hidden lg:block' : 'block'
+                )}
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Send className="w-4 h-4 text-primary" /> Create Announcement
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Pushes instantly to all users' Notification Center.
+                  </p>
+                </div>
 
-              <div className="space-y-3">
-                {broadcasts.length === 0 ? (
-                  <p className="text-xs text-muted-foreground py-8 text-center">No broadcasts published yet.</p>
-                ) : (
-                  broadcasts.map((bc) => (
-                    <div
-                      key={bc.id}
-                      className="p-4 rounded-xl border border-border/60 bg-muted/20 flex items-start justify-between gap-4"
-                    >
-                      <div className="space-y-1 min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-xs font-bold text-foreground">{bc.title}</h4>
-                          <span
-                            className={cn(
-                              'text-[9px] font-black uppercase px-1.5 py-0.2 rounded-md border',
-                              bc.category === 'alert'
-                                ? 'bg-rose-500/15 text-rose-400 border-rose-500/20'
-                                : bc.category === 'update'
-                                ? 'bg-purple-500/15 text-purple-400 border-purple-500/20'
-                                : 'bg-sky-500/15 text-sky-400 border-sky-500/20'
-                            )}
-                          >
-                            {bc.category}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{bc.message}</p>
-                      </div>
+                <form onSubmit={handleCreateBroadcast} className="space-y-3.5">
+                  <div>
+                    <Label className="text-xs font-semibold">Title</Label>
+                    <Input
+                      placeholder="e.g. Server Maintenance or New Feature"
+                      value={bcTitle}
+                      onChange={(e) => setBcTitle(e.target.value)}
+                      className="mt-1 h-10 rounded-xl text-xs"
+                      required
+                    />
+                  </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
+                  <div>
+                    <Label className="text-xs font-semibold block mb-1.5">Category</Label>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        { id: 'update', label: '🚀 Update' },
+                        { id: 'alert', label: '⚠️ Alert' },
+                        { id: 'info', label: '💡 Tip' },
+                      ].map((cat) => (
                         <button
+                          key={cat.id}
                           type="button"
-                          onClick={() => handleToggleBroadcast(bc.id, bc.active)}
+                          onClick={() => setBcCategory(cat.id as any)}
                           className={cn(
-                            'text-[10px] font-bold px-2 py-1 rounded-lg border transition-colors',
-                            bc.active
-                              ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
-                              : 'bg-muted text-muted-foreground border-border/50'
+                            'py-2 rounded-xl text-xs font-bold border transition-colors tap-shrink',
+                            bcCategory === cat.id
+                              ? 'bg-primary/10 border-primary text-primary'
+                              : 'bg-muted/40 border-border/60 text-muted-foreground'
                           )}
                         >
-                          {bc.active ? 'Active' : 'Disabled'}
+                          {cat.label}
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteBroadcast(bc.id)}
-                          className="p-1 text-muted-foreground hover:text-destructive transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                      ))}
                     </div>
-                  ))
+                  </div>
+
+                  <div>
+                    <Label className="text-xs font-semibold">Message</Label>
+                    <Textarea
+                      placeholder="Write your broadcast message..."
+                      value={bcMessage}
+                      onChange={(e) => setBcMessage(e.target.value)}
+                      className="mt-1 rounded-xl text-xs min-h-[90px]"
+                      required
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full h-10 rounded-xl gradient-primary font-bold text-xs tap-shrink"
+                  >
+                    <Send className="w-3.5 h-3.5 mr-1.5" /> Publish Announcement
+                  </Button>
+                </form>
+              </div>
+
+              {/* List (Always visible on desktop, tabbed on mobile) */}
+              <div
+                className={cn(
+                  'lg:col-span-2 rounded-2xl bg-card border border-border/70 p-4 sm:p-5 space-y-4 card-shadow',
+                  broadcastSubTab === 'compose' ? 'hidden lg:block' : 'block'
                 )}
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+                    <Radio className="w-4 h-4 text-primary" /> Active Broadcasts ({broadcasts.length})
+                  </h3>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setBroadcastSubTab('compose')}
+                    className="lg:hidden text-xs text-primary font-bold h-7 px-2"
+                  >
+                    + Compose
+                  </Button>
+                </div>
+
+                <div className="space-y-2.5">
+                  {broadcasts.length === 0 ? (
+                    <p className="text-xs text-muted-foreground py-8 text-center">
+                      No broadcasts published yet.
+                    </p>
+                  ) : (
+                    broadcasts.map((bc) => (
+                      <div
+                        key={bc.id}
+                        className="p-3.5 rounded-xl border border-border/60 bg-muted/20 flex items-start justify-between gap-3"
+                      >
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h4 className="text-xs font-bold text-foreground">{bc.title}</h4>
+                            <span
+                              className={cn(
+                                'text-[9px] font-black uppercase px-1.5 py-0.2 rounded-md border',
+                                bc.category === 'alert'
+                                  ? 'bg-rose-500/15 text-rose-400 border-rose-500/20'
+                                  : bc.category === 'update'
+                                  ? 'bg-purple-500/15 text-purple-400 border-purple-500/20'
+                                  : 'bg-sky-500/15 text-sky-400 border-sky-500/20'
+                              )}
+                            >
+                              {bc.category}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed">{bc.message}</p>
+                          <span className="text-[10px] text-muted-foreground/80 block mt-1">
+                            {new Date(bc.created_at).toLocaleString([], {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleBroadcast(bc.id, bc.active)}
+                            className={cn(
+                              'text-[10px] font-bold px-2 py-1 rounded-lg border transition-colors tap-shrink',
+                              bc.active
+                                ? 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30'
+                                : 'bg-muted text-muted-foreground border-border/50'
+                            )}
+                          >
+                            {bc.active ? 'Active' : 'Off'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteBroadcast(bc.id)}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors tap-shrink"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>
         )}
 
+        {/* ======================================================== */}
         {/* TAB 4: SYSTEM & FEATURE FLAGS */}
+        {/* ======================================================== */}
         {activeTab === 'system' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 card-enter">
-            <div className="rounded-2xl bg-card border border-border/60 p-5 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 card-enter">
+            {/* Toggles */}
+            <div className="rounded-2xl bg-card border border-border/70 p-4 sm:p-5 space-y-4 card-shadow">
               <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-primary" /> Application Feature Switches
               </h3>
 
-              <div className="space-y-4 pt-2">
-                <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/40">
-                  <div>
-                    <p className="text-xs font-bold text-foreground">Maintenance Mode</p>
-                    <p className="text-[11px] text-muted-foreground">Locks app for users during schema upgrades</p>
-                  </div>
-                  <Switch
-                    checked={config.maintenanceMode}
-                    onCheckedChange={(checked) => {
+              <div className="space-y-2.5 pt-1">
+                {[
+                  {
+                    title: 'Maintenance Mode',
+                    desc: 'Locks app for users during schema upgrades',
+                    checked: config.maintenanceMode,
+                    onChange: (checked: boolean) => {
                       setConfig((prev: any) => ({ ...prev, maintenanceMode: checked }));
                       toast.info(`Maintenance mode is now ${checked ? 'ON' : 'OFF'}`);
-                    }}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/40">
-                  <div>
-                    <p className="text-xs font-bold text-foreground">Allow New User Registrations</p>
-                    <p className="text-[11px] text-muted-foreground">Controls public sign-up on /auth</p>
+                    },
+                  },
+                  {
+                    title: 'Allow New Registrations',
+                    desc: 'Controls public sign-up on /auth',
+                    checked: config.allowRegistrations,
+                    onChange: (checked: boolean) =>
+                      setConfig((prev: any) => ({ ...prev, allowRegistrations: checked })),
+                  },
+                  {
+                    title: 'AI Insights Pipeline',
+                    desc: 'Smart finance coaching gateway',
+                    checked: config.aiInsightsEnabled,
+                    onChange: (checked: boolean) =>
+                      setConfig((prev: any) => ({ ...prev, aiInsightsEnabled: checked })),
+                  },
+                  {
+                    title: 'Beta Features Preview',
+                    desc: 'Bill Splitter, Shared Tasks',
+                    checked: config.betaFeatures,
+                    onChange: (checked: boolean) =>
+                      setConfig((prev: any) => ({ ...prev, betaFeatures: checked })),
+                  },
+                ].map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/40 gap-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-foreground">{item.title}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">{item.desc}</p>
+                    </div>
+                    <Switch checked={item.checked} onCheckedChange={item.onChange} />
                   </div>
-                  <Switch
-                    checked={config.allowRegistrations}
-                    onCheckedChange={(checked) =>
-                      setConfig((prev: any) => ({ ...prev, allowRegistrations: checked }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/40">
-                  <div>
-                    <p className="text-xs font-bold text-foreground">AI Insights Pipeline</p>
-                    <p className="text-[11px] text-muted-foreground">Monthly smart finance coaching gateway</p>
-                  </div>
-                  <Switch
-                    checked={config.aiInsightsEnabled}
-                    onCheckedChange={(checked) =>
-                      setConfig((prev: any) => ({ ...prev, aiInsightsEnabled: checked }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/40">
-                  <div>
-                    <p className="text-xs font-bold text-foreground">Beta Features Preview</p>
-                    <p className="text-[11px] text-muted-foreground">Bill Splitter, Shared Tasks</p>
-                  </div>
-                  <Switch
-                    checked={config.betaFeatures}
-                    onCheckedChange={(checked) =>
-                      setConfig((prev: any) => ({ ...prev, betaFeatures: checked }))
-                    }
-                  />
-                </div>
+                ))}
               </div>
             </div>
 
             {/* Supabase Specs */}
-            <div className="rounded-2xl bg-card border border-border/60 p-5 space-y-4">
+            <div className="rounded-2xl bg-card border border-border/70 p-4 sm:p-5 space-y-4 card-shadow">
               <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <Database className="w-4 h-4 text-teal-400" /> Database & Environment Specs
+                <Database className="w-4 h-4 text-teal-400" /> Database & Environment
               </h3>
 
-              <div className="space-y-3 pt-2">
+              <div className="space-y-2.5 pt-1">
                 <div className="p-3 rounded-xl bg-muted/30 border border-border/40 text-xs space-y-1">
-                  <span className="text-muted-foreground font-semibold">Connected Project</span>
+                  <span className="text-muted-foreground font-semibold text-[11px]">Connected Project</span>
                   <div className="flex items-center justify-between font-mono font-bold text-foreground">
                     <span>mcgptjnstxmnvkfnedxt</span>
                     <a
@@ -1058,24 +1425,24 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
                       rel="noopener noreferrer"
                       className="text-primary hover:underline flex items-center gap-1 text-[11px]"
                     >
-                      Supabase Console <ExternalLink className="w-3 h-3" />
+                      Console <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-muted/30 border border-border/40 text-xs space-y-1">
-                  <span className="text-muted-foreground font-semibold">Endpoint</span>
+                  <span className="text-muted-foreground font-semibold text-[11px]">Endpoint URL</span>
                   <p className="font-mono text-[11px] text-foreground truncate">
                     https://mcgptjnstxmnvkfnedxt.supabase.co
                   </p>
                 </div>
 
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs flex items-start gap-2.5">
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-xs flex items-start gap-2.5">
                   <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
                   <div>
                     <span className="font-bold block">Live Production Security</span>
-                    <span className="text-[11px] text-amber-200/80">
-                      Access is restricted exclusively to authenticated users carrying the `super_admin` role in the database.
+                    <span className="text-[11px] text-amber-200/80 leading-relaxed block mt-0.5">
+                      Access is restricted exclusively to authenticated users carrying the <code>super_admin</code> role in the database.
                     </span>
                   </div>
                 </div>
@@ -1084,19 +1451,21 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
           </div>
         )}
 
+        {/* ======================================================== */}
         {/* TAB 5: DATABASE SCHEMA & SQL */}
+        {/* ======================================================== */}
         {activeTab === 'security' && (
-          <div className="space-y-6 card-enter">
-            <div className="rounded-2xl bg-gradient-to-r from-card to-muted/40 border border-border/60 p-5 space-y-3">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center text-primary-foreground font-bold text-xs">
+          <div className="space-y-4 card-enter">
+            <div className="rounded-2xl bg-card border border-border/70 p-4 sm:p-5 space-y-3.5 card-shadow">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center text-primary-foreground font-bold text-xs shrink-0 shadow-xs">
                     SQL
                   </div>
                   <div>
                     <h3 className="text-sm font-bold text-foreground">Super Admin Setup Migration</h3>
-                    <p className="text-xs text-muted-foreground">
-                      Creates the <code className="font-bold">user_roles</code> and <code className="font-bold">system_broadcasts</code> tables with RLS in Supabase.
+                    <p className="text-[11px] text-muted-foreground">
+                      Creates <code>user_roles</code> and <code>system_broadcasts</code> tables with RLS.
                     </p>
                   </div>
                 </div>
@@ -1106,7 +1475,7 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
                     size="sm"
                     variant="outline"
                     onClick={handleCopySql}
-                    className="h-8 rounded-xl text-xs gap-1.5"
+                    className="flex-1 sm:flex-initial h-9 rounded-xl text-xs gap-1.5 tap-shrink"
                   >
                     {copiedSql ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copiedSql ? 'Copied!' : 'Copy SQL'}</span>
@@ -1116,12 +1485,17 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles FOR SELECT USING
                     href="https://supabase.com/dashboard/project/mcgptjnstxmnvkfnedxt/sql/new"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors"
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-xl gradient-primary text-primary-foreground text-xs font-bold hover:opacity-95 transition-opacity tap-shrink"
                   >
-                    <span>Supabase SQL Editor</span>
+                    <span>Open Editor</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
+              </div>
+
+              {/* Code block */}
+              <div className="relative rounded-xl bg-muted/60 border border-border/70 p-3 sm:p-4 overflow-x-auto max-h-72 text-[11px] font-mono text-muted-foreground">
+                <pre>{SUPER_ADMIN_SQL}</pre>
               </div>
             </div>
           </div>
