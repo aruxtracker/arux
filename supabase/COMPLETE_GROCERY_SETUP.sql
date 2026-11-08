@@ -49,7 +49,10 @@ $$;
 DROP POLICY IF EXISTS "View accessible households" ON public.grocery_households;
 CREATE POLICY "View accessible households" ON public.grocery_households
   FOR SELECT TO authenticated
-  USING (true);
+  USING (
+    owner_id = auth.uid() OR
+    public.is_household_member(id, auth.uid())
+  );
 
 DROP POLICY IF EXISTS "Insert own households" ON public.grocery_households;
 CREATE POLICY "Insert own households" ON public.grocery_households
@@ -70,7 +73,10 @@ CREATE POLICY "Delete owned households" ON public.grocery_households
 DROP POLICY IF EXISTS "View members of accessible households" ON public.grocery_household_members;
 CREATE POLICY "View members of accessible households" ON public.grocery_household_members
   FOR SELECT TO authenticated
-  USING (true);
+  USING (
+    user_id = auth.uid() OR
+    public.is_household_member(household_id, auth.uid())
+  );
 
 DROP POLICY IF EXISTS "Join household or owners add members" ON public.grocery_household_members;
 CREATE POLICY "Join household or owners add members" ON public.grocery_household_members

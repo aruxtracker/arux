@@ -34,15 +34,37 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
   const { user } = useAuth();
   const { profile } = useProfile();
 
+  const getHouseholdStorageKey = useCallback((userId?: string) => {
+    return userId ? `arux_active_grocery_household_${userId}` : 'arux_active_grocery_household';
+  }, []);
+
   // State initialized with offline cache
   const [households, setHouseholds] = useState<GroceryHousehold[]>(() => loadCache<GroceryHousehold>('groceryHouseholds') || []);
   const [activeHouseholdId, setActiveHouseholdId] = useState<string | null>(() => {
     try {
-      return localStorage.getItem('arux_active_grocery_household') || null;
+      const stored = localStorage.getItem('arux_active_grocery_household');
+      return stored && stored !== 'solo' ? stored : null;
     } catch {
       return null;
     }
   });
+
+  // When authenticated user changes, synchronize active household from user-scoped storage
+  useEffect(() => {
+    if (!user) {
+      setActiveHouseholdId(null);
+      return;
+    }
+    try {
+      const userKey = getHouseholdStorageKey(user.id);
+      const stored = localStorage.getItem(userKey);
+      if (stored === 'solo') {
+        setActiveHouseholdId(null);
+      } else if (stored) {
+        setActiveHouseholdId(stored);
+      }
+    } catch {}
+  }, [user?.id, getHouseholdStorageKey]);
 
   const [members, setMembers] = useState<GroceryHouseholdMember[]>([]);
   const [lists, setLists] = useState<GroceryList[]>(() => loadCache<GroceryList>('groceryLists') || []);
@@ -115,11 +137,52 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
         .order('created_at', { ascending: false });
 
       if (!hErr && hData) {
-        if (hasDataChanged(hData, householdsRef.current)) {
-          setHouseholds(hData);
+        // Defensively filter households so users NEVER see flats they do not belong to
+        const memberHouseholdIds = new Set<string>();
+        try {
+          const { data: myMemberships } = await supabase
+            .from('grocery_household_members' as any)
+            .select('household_id')
+            .eq('user_id', user.id);
+          if (myMemberships) {
+            myMemberships.forEach((m: any) => memberHouseholdIds.add(m.household_id));
+          }
+        } catch {}
+
+        const validHouseholds = (hData as GroceryHousehold[]).filter(
+          (h) => h.owner_id === user.id || memberHouseholdIds.has(h.id)
+        );
+
+        if (hasDataChanged(validHouseholds, householdsRef.current)) {
+          setHouseholds(validHouseholds);
         }
-        if (hData.length > 0 && !activeHouseholdId) {
-          setActiveHouseholdId(hData[0].id);
+
+        const userKey = getHouseholdStorageKey(user.id);
+        const storedPref = typeof localStorage !== 'undefined' ? localStorage.getItem(userKey) : null;
+
+        if (storedPref === 'solo') {
+          // Explicitly opted into solo/personal mode - never force into a household
+          if (activeHouseholdId !== null) {
+            setActiveHouseholdId(null);
+          }
+        } else if (activeHouseholdId) {
+          // If the currently selected household no longer belongs to user, switch to solo
+          const stillValid = validHouseholds.some((h) => h.id === activeHouseholdId);
+          if (!stillValid) {
+            setActiveHouseholdId(null);
+            try {
+              localStorage.setItem(userKey, 'solo');
+              localStorage.setItem('arux_active_grocery_household', 'solo');
+            } catch {}
+          }
+        } else if (!storedPref && validHouseholds.length > 0) {
+          // First time user with existing households: pick their first household
+          const firstId = validHouseholds[0].id;
+          setActiveHouseholdId(firstId);
+          try {
+            localStorage.setItem(userKey, firstId);
+            localStorage.setItem('arux_active_grocery_household', firstId);
+          } catch {}
         }
       }
 
@@ -185,6 +248,8 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
       let itemsQuery = supabase.from('grocery_list_items' as any).select('*').order('created_at', { ascending: true });
       if (activeHouseholdId) {
         itemsQuery = itemsQuery.eq('household_id', activeHouseholdId);
+      } else {
+        itemsQuery = itemsQuery.eq('created_by', user.id).is('household_id', null);
       }
       const { data: iData } = await itemsQuery;
       if (iData && hasDataChanged(iData, listItemsRef.current)) {
@@ -305,10 +370,13 @@ export function useGroceryData({ onAddExpense }: UseGroceryDataProps = {}) {
   const switchHousehold = (id: string | null) => {
     setActiveHouseholdId(id);
     try {
+      const userKey = getHouseholdStorageKey(user?.id);
       if (id) {
+        localStorage.setItem(userKey, id);
         localStorage.setItem('arux_active_grocery_household', id);
       } else {
-        localStorage.removeItem('arux_active_grocery_household');
+        localStorage.setItem(userKey, 'solo');
+        localStorage.setItem('arux_active_grocery_household', 'solo');
       }
     } catch {}
   };
