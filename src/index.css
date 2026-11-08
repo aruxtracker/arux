@@ -868,6 +868,92 @@
     --sidebar-ring: 200 84% 66%;
   }
 
+  /* ============== THEME: Diwali Glow (light) ============== */
+  :root[data-theme='diwali']:not(.dark) {
+    --background: 40 45% 97%;
+    --foreground: 25 35% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 35% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 35% 12%;
+    --primary: 38 96% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 24 95% 56%;
+    --secondary: 42 60% 94%;
+    --secondary-foreground: 30 70% 32%;
+    --muted: 40 30% 93%;
+    --muted-foreground: 30 15% 45%;
+    --accent: 42 65% 90%;
+    --accent-foreground: 30 70% 30%;
+    --border: 38 35% 88%;
+    --input: 38 30% 90%;
+    --ring: 38 96% 50%;
+    --brand-purple: 285 75% 55%;
+    --brand-pink: 335 85% 60%;
+    --brand-orange: 24 95% 55%;
+    --brand-yellow: 45 98% 52%;
+    --brand-teal: 160 80% 40%;
+    --brand-blue: 225 85% 60%;
+    --balance: 38 96% 50%;
+    --gradient-fun: linear-gradient(135deg, hsl(38 96% 52%) 0%, hsl(20 95% 56%) 50%, hsl(285 75% 55%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(38 96% 52%), hsl(285 75% 55%));
+    --gradient-warm: linear-gradient(135deg, hsl(45 98% 52%), hsl(20 95% 56%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(45 98% 65% / 0.28) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(24 95% 65% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(285 75% 65% / 0.18) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(40 90% 68% / 0.18) 0px, transparent 55%);
+    --sidebar-background: 40 45% 98%;
+    --sidebar-foreground: 25 30% 28%;
+    --sidebar-primary: 38 96% 50%;
+    --sidebar-accent: 42 60% 94%;
+    --sidebar-accent-foreground: 30 70% 32%;
+    --sidebar-border: 38 35% 88%;
+    --sidebar-ring: 38 96% 50%;
+  }
+
+  /* ============== THEME: Diwali Glow (dark) ============== */
+  :root.dark[data-theme='diwali'] {
+    --background: 25 35% 7%;
+    --foreground: 42 30% 95%;
+    --card: 25 30% 11%;
+    --card-foreground: 42 30% 95%;
+    --popover: 25 30% 11%;
+    --popover-foreground: 42 30% 95%;
+    --primary: 40 98% 58%;
+    --primary-foreground: 25 45% 8%;
+    --primary-glow: 22 95% 60%;
+    --secondary: 25 25% 18%;
+    --secondary-foreground: 42 70% 85%;
+    --muted: 25 20% 16%;
+    --muted-foreground: 35 15% 68%;
+    --accent: 28 35% 22%;
+    --accent-foreground: 42 70% 88%;
+    --border: 30 25% 22%;
+    --input: 30 25% 22%;
+    --ring: 40 98% 58%;
+    --brand-purple: 285 80% 68%;
+    --brand-pink: 335 88% 68%;
+    --brand-orange: 24 96% 62%;
+    --brand-yellow: 45 100% 60%;
+    --brand-teal: 160 80% 55%;
+    --brand-blue: 225 85% 68%;
+    --balance: 40 98% 58%;
+    --gradient-fun: linear-gradient(135deg, hsl(42 98% 56%) 0%, hsl(20 95% 58%) 50%, hsl(285 75% 62%) 100%);
+    --gradient-cool: linear-gradient(135deg, hsl(40 98% 58%), hsl(285 75% 62%));
+    --gradient-warm: linear-gradient(135deg, hsl(45 100% 60%), hsl(20 95% 58%));
+    --gradient-mesh: radial-gradient(at 0% 0%, hsl(40 98% 50% / 0.35) 0px, transparent 55%),
+                     radial-gradient(at 100% 0%, hsl(24 95% 50% / 0.28) 0px, transparent 55%),
+                     radial-gradient(at 100% 100%, hsl(285 75% 50% / 0.22) 0px, transparent 55%),
+                     radial-gradient(at 0% 100%, hsl(45 95% 45% / 0.2) 0px, transparent 55%);
+    --sidebar-background: 25 35% 8%;
+    --sidebar-foreground: 42 20% 85%;
+    --sidebar-primary: 40 98% 58%;
+    --sidebar-accent: 25 25% 16%;
+    --sidebar-accent-foreground: 42 70% 88%;
+    --sidebar-border: 30 25% 18%;
+    --sidebar-ring: 40 98% 58%;
+  }
+
 
   .dark {
     --background: 245 30% 7%;

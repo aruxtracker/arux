@@ -110,7 +110,7 @@ export const REMINDER_TYPES: { value: ReminderType; label: string; emoji: string
 
 export type ThemeId =
   | 'purple' | 'ocean' | 'sunset' | 'forest' | 'rose' | 'mono'
-  | 'candy' | 'cyber' | 'sand' | 'arctic';
+  | 'candy' | 'cyber' | 'sand' | 'arctic' | 'diwali';
 
 export interface AppSettings {
   darkMode: boolean;

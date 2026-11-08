@@ -1,6 +1,6 @@
 export type ThemeId =
   | 'purple' | 'ocean' | 'sunset' | 'forest' | 'rose' | 'mono'
-  | 'candy' | 'cyber' | 'sand' | 'arctic';
+  | 'candy' | 'cyber' | 'sand' | 'arctic' | 'diwali';
 
 export interface ThemeOption {
   id: ThemeId;
@@ -11,6 +11,7 @@ export interface ThemeOption {
 
 export const THEMES: ThemeOption[] = [
   { id: 'purple', label: 'Midnight Purple', emoji: '🟣', swatch: 'from-violet-500 via-fuchsia-500 to-pink-500' },
+  { id: 'diwali', label: 'Diwali Glow',     emoji: '🪔', swatch: 'from-amber-400 via-orange-500 to-purple-600' },
   { id: 'ocean',  label: 'Ocean Blue',      emoji: '🌊', swatch: 'from-cyan-400 via-sky-500 to-blue-600' },
   { id: 'sunset', label: 'Sunset Orange',   emoji: '🌅', swatch: 'from-yellow-400 via-orange-500 to-rose-500' },
   { id: 'forest', label: 'Forest Green',    emoji: '🌿', swatch: 'from-lime-400 via-emerald-500 to-teal-600' },
